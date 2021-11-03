@@ -43,6 +43,6 @@ debug:
 # Create the ELF version by mixing together the startup file,
 # application, and linker file
 %.elf: $(STARTUP) $(SRC)
-	$(CC) -o $@ $(CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $^
+	$(CC) -o $@ $(CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $^ -O2
 
 .PHONY: all program
