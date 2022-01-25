@@ -9,7 +9,7 @@ CC        = $(CC_PREFIX)gcc
 OBJCOPY   = $(CC_PREFIX)objcopy
 STARTUP   = startup_stm32l1xx_md.s
 #CFLAGS    = -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float -O -g
-CFLAGS    = -mthumb -mcpu=cortex-m3
+CFLAGS    = -mthumb -mcpu=cortex-m3 -Wunused -Werror
 
 
 ## OPENOCD VARIABLES  ##
@@ -21,6 +21,8 @@ OOCD_BOARD = stm32ldiscovery.cfg
 all: program
 
 program: $(PROJ_NAME).hex
+
+install:
 	pkill openocd || true
 	openocd -f board/$(OOCD_BOARD) \
 					-c "init" -c "targets" -c "halt" \

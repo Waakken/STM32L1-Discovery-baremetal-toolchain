@@ -1,113 +1,108 @@
-#define RCC_AHBENR_JANI   0x4002381C
-#define RCC_APB1ENR_JANI  0x40023824
+#include "reg_defs.h"
+#include "reg_addr.h"
 
-#define GPIOA_JANI        0x40020000
-#define GPIOA_ODR_JANI    0x40020014
+struct gpio *gpioa = (struct gpio *)GPIOA;
+struct gpio *gpiob = (struct gpio *)GPIOB;
+struct gpio *gpioc = (struct gpio *)GPIOC;
+struct gpio *gpiod = (struct gpio *)GPIOD;
+struct rcc *rcc = (struct rcc *)RCC;
+struct tim2 *tim2 = (struct tim2 *)TIM2;
+struct rtc *rtc = (struct rtc *)RTC;
 
-#define TIM2_BASE_JANI    0x40000000
-#define TIM2_CR1_JANI     TIM2_BASE_JANI
-#define TIM2_CNT_JANI     0x40000024
+void init_lcd_clock()
+{
+    rtc->wpr = 0xca;
+    rtc->wpr = 0x53;
+}
 
-typedef volatile unsigned long REG;
+
+void init_gpios_for_lcd()
+{
+    // Set to AF 11
+
+    char af_11 = 11;
+    // A - 6, 7
+    gpioa->afrl = gpioa->afrl | (af_11 << 24) | (af_11 << 28);
+    // A - 8, 9, 10, 15
+    gpioa->afrh = gpioa->afrh | (af_11) | (af_11 << 4) | (af_11 << 8) | (af_11 << 28);
+
+    // B - 0, 1, 4, 5
+    gpiob->afrl = gpiob->afrl | (af_11) | (af_11 << 4) | (af_11 << 16) | (af_11 << 20);
+    // B - 9, 12, 13, 14, 15
+    gpiob->afrh = gpiob->afrh | (af_11 << 4) | (af_11 << 16) | (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
+
+    // C - 3, 4, 5, 6, 7
+    gpioc->afrl = gpioc->afrl | (af_11 << 12) | (af_11 << 16) | (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
+    // C - 8
+    gpioc->afrh = gpioc->afrh | (af_11);
+
+    // D - 8, 9, 10, 11, 12, 13, 14, 15
+    gpiod->afrh = gpiod->afrh | (af_11) | (af_11 << 4) |
+        (af_11 << 8) | (af_11 << 12) | (af_11 << 16) |
+        (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
+
+    /*
+      TODO: Enable A, B, C, D clocks
+     */
+}
 
 void turn_on_led()
 {
-  REG *gpioa_ptr, *rcc_ahbenr_ptr, *gpio_odr_ptr;
-  unsigned long val;
+  rcc->ahbenr = rcc->ahbenr | 1;
 
-  rcc_ahbenr_ptr = (REG *)RCC_AHBENR_JANI;
-  gpioa_ptr = (REG *)GPIOA_JANI;
-  gpio_odr_ptr = (REG *)GPIOA_ODR_JANI;
-
-  *rcc_ahbenr_ptr = *rcc_ahbenr_ptr | 1;
-
-  *gpioa_ptr = *gpioa_ptr | 1;
-
-  *gpio_odr_ptr = *gpio_odr_ptr | 1;
-
+  gpioa->moder = gpioa->moder | 1;
+  gpioa->odr = gpioa->odr | 1;
 }
 
 void turn_off_led()
 {
-  REG *gpioa_ptr, *rcc_ahbenr_ptr, *gpio_odr_ptr;
-  unsigned long val;
-
-  rcc_ahbenr_ptr = (REG *)RCC_AHBENR_JANI;
-  gpioa_ptr = (REG *)GPIOA_JANI;
-  gpio_odr_ptr = (REG *)GPIOA_ODR_JANI;
-
-  *rcc_ahbenr_ptr = *rcc_ahbenr_ptr | 1;
-
-  *gpioa_ptr = *gpioa_ptr | 1;
-
-  *gpio_odr_ptr = *gpio_odr_ptr & ~1;
-
-}
-
-void enable_timer()
-{
-    REG *apb1enr_ptr, *tim2_cr1_ptr, *tim2_cnt_ptr;
-    unsigned long val;
-
-    apb1enr_ptr = (REG *)RCC_APB1ENR_JANI;
-    tim2_cr1_ptr = (REG *)TIM2_CR1_JANI;
-    tim2_cnt_ptr = (REG *)TIM2_CNT_JANI;
-
-    /* enable tim2 */
-    val = *apb1enr_ptr | 1;
-    *apb1enr_ptr = val;
-    val = *tim2_cr1_ptr | 1;
-    *tim2_cr1_ptr = val;
-
-    for (int i = 0; i < 10; i++) {
-        /* Read timer value */
-        val = *tim2_cnt_ptr;
-    }
+  rcc->ahbenr = rcc->ahbenr | 1;
+  gpioa->odr = gpioa->odr & ~1;
 }
 
 static void delay(unsigned ms)
 {
-    int val;
-    REG *apb1enr_ptr = (REG *)RCC_APB1ENR_JANI;
-    REG *tim2_base_ptr = (REG *)TIM2_CR1_JANI;
-    REG *tim2_cr_ptr = (REG *)TIM2_BASE_JANI;
-    REG *tim2_sr_ptr = (REG *)(TIM2_BASE_JANI + 0x10);
-    REG *tim2_psc_ptr = (REG *)(TIM2_BASE_JANI + 0x28);
-    REG *tim2_arr_ptr = (REG *)(TIM2_BASE_JANI + 0x2c);
-    REG *tim2_cnt_ptr = (REG *)TIM2_CNT_JANI;
-
     /* enable tim2 */
-    *apb1enr_ptr = *apb1enr_ptr | 1;
+    rcc->apb1enr = rcc->apb1enr | 1;
 
     /* unset cr1 */
-    *tim2_cr_ptr = *tim2_cr_ptr & ~1;
-    *tim2_sr_ptr = 0;
+    tim2->cr1 = tim2->cr1 & ~1;
+    tim2->sr = 0;
 
     /* clear counter */
-    *tim2_cnt_ptr = 0;
+    tim2->cnt = 0;
 
     /* set prescaler */
     /* 15 sec */
-    /* *tim2_psc_ptr = 0x2000; */
 
     /* 2 sec */
-    *tim2_psc_ptr = 0x200;
+    tim2->psc = 0x200;
 
     /* arr = ms */
-    *tim2_arr_ptr = ms;
+    tim2->arr = ms;
 
     /* enable tim2 */
-    *tim2_cr_ptr = *tim2_cr_ptr | 1;
+    tim2->cr1 = tim2->cr1 | 1;
 
-    while(!*tim2_sr_ptr);
+    while(!tim2->sr);
+}
+
+void blink_led(char count) {
+    for (int i = 0; i < 3; i++) {
+        /* TODO: Why this argument doesn't work? */
+        /* for (char i = 0; i < count; i++) { */
+        turn_on_led();
+        delay(2000);
+        turn_off_led();
+        delay(2000);
+    }
 }
 
 int main() {
-    while (1) {
-        turn_on_led();
-        delay(0x1000);
-        turn_off_led();
-        delay(0x1000);
-    }
+    blink_led(3);
+    init_gpios_for_lcd();
+
+    /* delay(4000); */
+    /* blink_led(5); */
     return 0;
 }
