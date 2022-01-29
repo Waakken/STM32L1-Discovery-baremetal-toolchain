@@ -75,3 +75,16 @@ struct rtc {
     REG alrmassr;
     REG alrmbssr;
 };
+
+struct lcd {
+    REG cr;
+    REG fcr;
+    REG sr;
+    REG clr;
+    REG ram[8];
+};
+
+struct pwr {
+    REG cr;
+    REG csr;
+};

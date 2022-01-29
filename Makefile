@@ -9,7 +9,8 @@ CC        = $(CC_PREFIX)gcc
 OBJCOPY   = $(CC_PREFIX)objcopy
 STARTUP   = startup_stm32l1xx_md.s
 #CFLAGS    = -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float -O -g
-CFLAGS    = -mthumb -mcpu=cortex-m3 -Wunused -Werror
+#CFLAGS    = -mthumb -mcpu=cortex-m3 -Wunused -Werror  -O2
+CFLAGS    = -mthumb -mcpu=cortex-m3 -Wunused -Werror -O1 -g
 
 
 ## OPENOCD VARIABLES  ##
@@ -46,6 +47,6 @@ debug:
 # Create the ELF version by mixing together the startup file,
 # application, and linker file
 %.elf: $(STARTUP) $(SRC)
-	$(CC) -o $@ $(CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $^ -O2
+	$(CC) -o $@ $(CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $^
 
 .PHONY: all program
