@@ -81,7 +81,7 @@ struct lcd {
     REG fcr;
     REG sr;
     REG clr;
-    REG ram[8];
+    REG ram[16];
 };
 
 struct pwr {

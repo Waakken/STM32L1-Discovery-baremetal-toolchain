@@ -18,8 +18,16 @@ display/x $r7
 #display/20 *0x40002800
 
 #break *0x8000190
-#break *0x8000212
+
+# main
+break *0x8000302
+
+# init_lcd
 break *0x80001a0
+
+# lcd loop
+#break *0x80001be
+
 #continue
 
 # Read

@@ -11,11 +11,20 @@ struct rtc *rtc = (struct rtc *)RTC;
 struct lcd *lcd = (struct lcd *)LCD;
 struct pwr *pwr = (struct pwr *)PWR;
 
+void write_lcd()
+{
+    for (int i = 0; i < 16; i++) {
+        lcd->ram[i] = 0xffffffff;
+    }
+
+    // Update display request
+    lcd->sr |= (1 << 2);
+
+    while(1);
+}
+
 void init_lcd()
 {
-    // enable
-    //lcd->cr |= 1;
-
     // bias 1/3
     lcd->cr |=  (1 << 6);
 
@@ -23,16 +32,21 @@ void init_lcd()
     lcd->cr |= (3 << 2);
 
     // contrast 111
-    lcd->fcr |=  (3 << 10);
+    /* lcd->fcr |=  (3 << 10); */
+    lcd->fcr |=  (7 << 10);
 
     // pulse width
-    lcd->fcr |= (7 << 4);
+    /* lcd->fcr |= (7 << 4); */
+    lcd->fcr |= (3 << 4);
 
     // disable mux
     lcd->cr &= ~(1 << 7);
 
     // use internal voltage source
     lcd->cr &= ~1;
+
+    // enable
+    lcd->cr |= 1;
 
     asm("nop");
     asm("nop");
@@ -49,9 +63,6 @@ void init_clocks_for_lcd()
     // Disable backup write protection
     pwr->cr |=  (1 << 8);
 
-    rtc->wpr = 0xca;
-    rtc->wpr = 0x53;
-
     // rcc->csr Looks OK!
     // enable LSI
     rcc->csr |= 1;
@@ -61,13 +72,34 @@ void init_clocks_for_lcd()
 
     // enable RTC clock
     rcc->csr |= (1 << 22);
+
+    // enable LCD clock
+    rcc->apb1enr |= (1 << 9);
 }
 
 void init_gpio_clocks() {
     rcc->ahbenr |= 0xf;
 }
 
-void init_gpios_for_lcd()
+void set_gpio_moder_to_af()
+{
+    char af = 2;
+    // A - 6, 7, 8, 9, 10, 15
+    gpioa->moder |= (af << 12) | (af << 14) | (af << 16) | (af << 20) | (af << 22) | (af << 30);
+
+    // B - 0, 1, 4, 5, 9, 12, 13, 14, 15
+    gpiob->moder |= (af) | (af << 2) | (af << 8) | (af << 10) | (af << 18) | (af << 24) | (af << 26) | (af << 28) | (af << 30);
+
+    // C - 3, 4, 5, 6, 7, 8
+    gpioc->moder |= (af << 6) | (af << 8) | (af << 10) | (af << 12) | (af << 14) | (af << 16);
+
+    // D - 8, 9, 10, 11, 12, 13, 14, 15
+    gpiod->moder |= (af << 16) |
+        (af << 18) | (af << 20) | (af << 22) |
+        (af << 24) | (af << 26) | (af << 28) | (af << 30);
+}
+
+void set_gpio_af_modes()
 {
     // Set to AF 11
 
@@ -91,10 +123,6 @@ void init_gpios_for_lcd()
     gpiod->afrh |= (af_11) | (af_11 << 4) |
         (af_11 << 8) | (af_11 << 12) | (af_11 << 16) |
         (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
-
-    /*
-      TODO: Enable A, B, C, D clocks
-     */
 }
 
 void turn_on_led()
@@ -157,14 +185,18 @@ int main() {
     init_gpio_clocks();
     blink_led(3);
 
-    init_gpios_for_lcd();
+    set_gpio_moder_to_af();
+    set_gpio_af_modes();
     init_clocks_for_lcd();
     asm("nop");
     asm("nop");
     asm("nop");
     init_lcd();
+    write_lcd();
 
     /* delay(4000); */
     /* blink_led(5); */
+    while(1);
+
     return 0;
 }
