@@ -5,11 +5,16 @@ struct gpio *gpioa = (struct gpio *)GPIOA;
 struct gpio *gpiob = (struct gpio *)GPIOB;
 struct gpio *gpioc = (struct gpio *)GPIOC;
 struct gpio *gpiod = (struct gpio *)GPIOD;
+struct gpio *gpioe = (struct gpio *)GPIOE;
 struct rcc *rcc = (struct rcc *)RCC;
 struct tim2 *tim2 = (struct tim2 *)TIM2;
 struct rtc *rtc = (struct rtc *)RTC;
 struct lcd *lcd = (struct lcd *)LCD;
 struct pwr *pwr = (struct pwr *)PWR;
+
+#define SET_GPIO_MODER_BIT(reg, nth, val) (reg |= (val << (nth * 2)))
+#define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))
+#define SET_GPIO_AFRH_BIT(reg, nth, val) (reg |= (val << ((nth - 8) * 4)))
 
 void write_lcd()
 {
@@ -78,25 +83,40 @@ void init_clocks_for_lcd()
 }
 
 void init_gpio_clocks() {
-    rcc->ahbenr |= 0xf;
+    rcc->ahbenr |= 0x1f;
 }
 
 void set_gpio_moder_to_af()
 {
     char af = 2;
-    // A - 6, 7, 8, 9, 10, 15
-    gpioa->moder |= (af << 12) | (af << 14) | (af << 16) | (af << 20) | (af << 22) | (af << 30);
 
-    // B - 0, 1, 4, 5, 9, 12, 13, 14, 15
-    gpiob->moder |= (af) | (af << 2) | (af << 8) | (af << 10) | (af << 18) | (af << 24) | (af << 26) | (af << 28) | (af << 30);
+    SET_GPIO_MODER_BIT(gpioa->moder, 1, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 2, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 3, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 6, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 7, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 8, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 9, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 10, af);
+    SET_GPIO_MODER_BIT(gpioa->moder, 15, af);
 
-    // C - 3, 4, 5, 6, 7, 8
-    gpioc->moder |= (af << 6) | (af << 8) | (af << 10) | (af << 12) | (af << 14) | (af << 16);
+    SET_GPIO_MODER_BIT(gpiob->moder, 0, af);
+    SET_GPIO_MODER_BIT(gpiob->moder, 1, af);
+    SET_GPIO_MODER_BIT(gpiob->moder, 3, af);
+    SET_GPIO_MODER_BIT(gpiob->moder, 4, af);
+    SET_GPIO_MODER_BIT(gpiob->moder, 5, af);
+    for (char i = 8; i < 16; i++)
+        SET_GPIO_MODER_BIT(gpiob->moder, i, af);
 
-    // D - 8, 9, 10, 11, 12, 13, 14, 15
-    gpiod->moder |= (af << 16) |
-        (af << 18) | (af << 20) | (af << 22) |
-        (af << 24) | (af << 26) | (af << 28) | (af << 30);
+    for (char i = 0; i < 13; i++)
+        SET_GPIO_MODER_BIT(gpioc->moder, i, af);
+
+    SET_GPIO_MODER_BIT(gpiod->moder, 2, af);
+    for (char i = 8; i < 16; i++)
+        SET_GPIO_MODER_BIT(gpiod->moder, i, af);
+
+    for (char i = 0; i < 5; i++)
+        SET_GPIO_MODER_BIT(gpioe->moder, i, af);
 }
 
 void set_gpio_af_modes()
@@ -104,25 +124,37 @@ void set_gpio_af_modes()
     // Set to AF 11
 
     char af_11 = 11;
-    // A - 6, 7
-    gpioa->afrl |= (af_11 << 24) | (af_11 << 28);
-    // A - 8, 9, 10, 15
-    gpioa->afrh |= (af_11) | (af_11 << 4) | (af_11 << 8) | (af_11 << 28);
 
-    // B - 0, 1, 4, 5
-    gpiob->afrl |= (af_11) | (af_11 << 4) | (af_11 << 16) | (af_11 << 20);
-    // B - 9, 12, 13, 14, 15
-    gpiob->afrh |= (af_11 << 4) | (af_11 << 16) | (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
+    SET_GPIO_AFRL_BIT(gpioa->afrl, 1, af_11);
+    SET_GPIO_AFRL_BIT(gpioa->afrl, 2, af_11);
+    SET_GPIO_AFRL_BIT(gpioa->afrl, 3, af_11);
+    SET_GPIO_AFRL_BIT(gpioa->afrl, 6, af_11);
+    SET_GPIO_AFRL_BIT(gpioa->afrl, 7, af_11);
 
-    // C - 3, 4, 5, 6, 7
-    gpioc->afrl |= (af_11 << 12) | (af_11 << 16) | (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
-    // C - 8
-    gpioc->afrh |= (af_11);
+    SET_GPIO_AFRH_BIT(gpioa->afrh, 8, af_11);
+    SET_GPIO_AFRH_BIT(gpioa->afrh, 9, af_11);
+    SET_GPIO_AFRH_BIT(gpioa->afrh, 10, af_11);
+    SET_GPIO_AFRH_BIT(gpioa->afrh, 15, af_11);
 
-    // D - 8, 9, 10, 11, 12, 13, 14, 15
-    gpiod->afrh |= (af_11) | (af_11 << 4) |
-        (af_11 << 8) | (af_11 << 12) | (af_11 << 16) |
-        (af_11 << 20) | (af_11 << 24) | (af_11 << 28);
+    SET_GPIO_AFRL_BIT(gpiob->afrl, 0, af_11);
+    SET_GPIO_AFRL_BIT(gpiob->afrl, 1, af_11);
+    SET_GPIO_AFRL_BIT(gpiob->afrl, 3, af_11);
+    SET_GPIO_AFRL_BIT(gpiob->afrl, 4, af_11);
+    SET_GPIO_AFRL_BIT(gpiob->afrl, 5, af_11);
+    for (char i = 8; i < 16; i++)
+        SET_GPIO_AFRH_BIT(gpiob->afrh, i, af_11);
+
+    for (char i = 0; i < 8; i++)
+        SET_GPIO_AFRL_BIT(gpioc->afrl, i, af_11);
+    for (char i = 8; i < 13; i++)
+        SET_GPIO_AFRH_BIT(gpioc->afrh, i, af_11);
+
+    SET_GPIO_AFRL_BIT(gpiod->afrl, 2, af_11);
+    for (char i = 8; i < 13; i++)
+        SET_GPIO_AFRH_BIT(gpiod->afrh, i, af_11);
+
+    for (char i = 0; i < 4; i++)
+        SET_GPIO_AFRL_BIT(gpioe->afrl, i, af_11);
 }
 
 void turn_on_led()

@@ -8,6 +8,7 @@
 #define GPIOB            0x40020400
 #define GPIOC            0x40020800
 #define GPIOD            0x40020C00
+#define GPIOE            0x40021000
 #define RCC              0x40023800
 
 
