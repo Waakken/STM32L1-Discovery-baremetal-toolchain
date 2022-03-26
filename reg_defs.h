@@ -76,12 +76,13 @@ struct rtc {
     REG alrmbssr;
 };
 
+#define RAM_BUFS (4 * 2)
 struct lcd {
     REG cr;
     REG fcr;
     REG sr;
     REG clr;
-    REG ram[16];
+    REG ram[RAM_BUFS];
 };
 
 struct pwr {

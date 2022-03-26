@@ -12,20 +12,78 @@ struct rtc *rtc = (struct rtc *)RTC;
 struct lcd *lcd = (struct lcd *)LCD;
 struct pwr *pwr = (struct pwr *)PWR;
 
+REG ram_buf[RAM_BUFS];
+int ram_pixel_idx = 0;
+int ram_buf_idx = 0;
+
 #define SET_GPIO_MODER_BIT(reg, nth, val) (reg |= (val << (nth * 2)))
 #define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))
 #define SET_GPIO_AFRH_BIT(reg, nth, val) (reg |= (val << ((nth - 8) * 4)))
 
-void write_lcd()
+void fill_ram_buf()
 {
-    for (int i = 0; i < 16; i++) {
-        lcd->ram[i] = 0xffffffff;
+    for (int i = 0; i < RAM_BUFS; i++) {
+        ram_buf[i] = 0xffffffff;
+    }
+}
+
+void write_next_pixel()
+{
+    ram_buf[ram_buf_idx] |= (1 << ram_pixel_idx);
+    ram_pixel_idx++;
+    if (ram_pixel_idx > 31){
+        ram_pixel_idx = 0;
+        ram_buf_idx++;
+    }
+}
+
+void write_full_buf()
+{
+    ram_buf[ram_buf_idx] = 0xffffffff;
+    ram_buf_idx++;
+    if (ram_buf_idx > 15)
+        ram_buf_idx = 0;
+}
+
+void zero_ram_buf()
+{
+    for (int i = 0; i < RAM_BUFS; i++) {
+        ram_buf[i] = 0;
+    }
+}
+
+void copy_lcd_ram_buf()
+{
+    for (int i = 0; i < RAM_BUFS; i++) {
+        lcd->ram[i] = ram_buf[i];
+    }
+
+    // Update display request
+    lcd->sr |= (1 << 2);
+}
+
+void show_empty_screen()
+{
+    for (int i = 0; i < RAM_BUFS; i++) {
+        lcd->ram[i] = 0;
     }
 
     // Update display request
     lcd->sr |= (1 << 2);
 
-    while(1);
+    /* while(1); */
+}
+
+void zero_lcd_bits()
+{
+    for (int i = 0; i < RAM_BUFS; i++) {
+        lcd->ram[i] = 0;
+    }
+
+    // Update display request
+    lcd->sr |= (1 << 2);
+
+    /* while(1); */
 }
 
 void init_lcd()
@@ -168,7 +226,7 @@ void turn_off_led()
   gpioa->odr &= ~1;
 }
 
-static void delay(unsigned ms)
+void delay(unsigned ms)
 {
     /* enable tim2 */
     rcc->apb1enr |= 1;
@@ -200,14 +258,21 @@ static void delay(unsigned ms)
     while(!tim2->sr);
 }
 
+int delay_hack() {
+    for (int i = 0; i < 400000; i++)
+        asm("nop");
+}
+
 void blink_led(char count) {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
         /* TODO: Why this argument doesn't work? */
         /* for (char i = 0; i < count; i++) { */
         turn_on_led();
-        delay(2000);
+        /* delay(2000); */
+        delay_hack();
         turn_off_led();
-        delay(2000);
+        /* delay(2000); */
+        delay_hack();
     }
 }
 
@@ -224,8 +289,17 @@ int main() {
     asm("nop");
     asm("nop");
     init_lcd();
-    write_lcd();
+    zero_ram_buf();
+    while (1) {
+        /* write_full_buf(); */
+        /* fill_ram_buf(); */
+        write_next_pixel();
+        copy_lcd_ram_buf();
+        delay(200);
+        /* delay_hack(); */
 
+        /* show_empty_screen(); */
+    }
     /* delay(4000); */
     /* blink_led(5); */
     while(1);
