@@ -20,6 +20,9 @@ int ram_buf_idx = 0;
 #define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))
 #define SET_GPIO_AFRH_BIT(reg, nth, val) (reg |= (val << ((nth - 8) * 4)))
 
+// forward declarations
+void blink_led(char count);
+
 void fill_ram_buf()
 {
     for (int i = 0; i < RAM_BUFS; i++) {
@@ -34,6 +37,7 @@ void write_next_pixel()
     if (ram_pixel_idx > 31){
         ram_pixel_idx = 0;
         ram_buf_idx++;
+        blink_led(3);
     }
 }
 
@@ -54,6 +58,8 @@ void zero_ram_buf()
 
 void copy_lcd_ram_buf()
 {
+    // TODO: Need to wait and see that it's safe to write
+
     for (int i = 0; i < RAM_BUFS; i++) {
         lcd->ram[i] = ram_buf[i];
     }
@@ -88,11 +94,26 @@ void zero_lcd_bits()
 
 void init_lcd()
 {
+    // bias 1/2
+    //lcd->cr |=  (1 << 5);
+
     // bias 1/3
     lcd->cr |=  (1 << 6);
 
+    // bias 1/4
+    // = 0
+
+    // duty 1/2
+    //lcd->cr |= (1 << 2);
+
+    // duty 1/3
+    //lcd->cr |= (1 << 3);
+
     // duty 1/4
     lcd->cr |= (3 << 2);
+
+    // duty 1/8
+    //lcd->cr |= (1 << 4);
 
     // contrast 111
     /* lcd->fcr |=  (3 << 10); */
@@ -280,7 +301,7 @@ int main() {
     asm("nop");
     asm("nop");
     init_gpio_clocks();
-    blink_led(3);
+    /* blink_led(3); */
 
     set_gpio_moder_to_af();
     set_gpio_af_modes();
@@ -290,6 +311,20 @@ int main() {
     asm("nop");
     init_lcd();
     zero_ram_buf();
+
+    // ready conf:
+    ram_buf[0] = (0xc << 12) | (0x3 << 16);
+    ram_buf[2] = (0x4 << 12) | (0x2 << 16);
+
+    //ram_buf[0] = 0xffffffff;
+    //ram_buf[2] = 0xffffffff;
+    //ram_buf[3] = 0xffffffff;
+    //ram_buf[4] = 0xffffffff;
+    //ram_buf[5] = 0xffffffff;
+    //ram_buf[6] = 0xffffffff;
+    copy_lcd_ram_buf();
+    while(1);
+
     while (1) {
         /* write_full_buf(); */
         /* fill_ram_buf(); */
@@ -299,6 +334,8 @@ int main() {
         /* delay_hack(); */
 
         /* show_empty_screen(); */
+        if (ram_buf_idx >= RAM_BUFS)
+            break;
     }
     /* delay(4000); */
     /* blink_led(5); */

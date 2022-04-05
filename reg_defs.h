@@ -82,6 +82,7 @@ struct lcd {
     REG fcr;
     REG sr;
     REG clr;
+    REG reserved;
     REG ram[RAM_BUFS];
 };
 
