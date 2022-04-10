@@ -19,9 +19,12 @@ int ram_buf_idx = 0;
 #define SET_GPIO_MODER_BIT(reg, nth, val) (reg |= (val << (nth * 2)))
 #define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))
 #define SET_GPIO_AFRH_BIT(reg, nth, val) (reg |= (val << ((nth - 8) * 4)))
+#define SET_NTH_BIT(reg, nth) ((reg) |= (1 << (nth)))
+#define FULL_32 (0xffffffff)
 
 // forward declarations
-void blink_led(char count);
+void blink_led(int count);
+void show_digit_in_five(int digit);
 
 void fill_ram_buf()
 {
@@ -45,7 +48,7 @@ void write_full_buf()
 {
     ram_buf[ram_buf_idx] = 0xffffffff;
     ram_buf_idx++;
-    if (ram_buf_idx > 15)
+    if (ram_buf_idx > RAM_BUFS)
         ram_buf_idx = 0;
 }
 
@@ -56,7 +59,7 @@ void zero_ram_buf()
     }
 }
 
-void copy_lcd_ram_buf()
+void commit_lcd_ram_buf()
 {
     // TODO: Need to wait and see that it's safe to write
 
@@ -284,24 +287,169 @@ int delay_hack() {
         asm("nop");
 }
 
-void blink_led(char count) {
-    for (int i = 0; i < 2; i++) {
-        /* TODO: Why this argument doesn't work? */
-        /* for (char i = 0; i < count; i++) { */
+void blink_led(int count) {
+    for (int i = 0; i < count; i++) {
+        show_digit_in_five(i);
         turn_on_led();
-        /* delay(2000); */
-        delay_hack();
+        delay(3000);
+        //delay_hack();
         turn_off_led();
-        /* delay(2000); */
-        delay_hack();
+        delay(3000);
+        //delay_hack();
+    }
+}
+
+void show_number_two_in_six() {
+    SET_NTH_BIT(ram_buf[0], 14);
+    SET_NTH_BIT(ram_buf[0], 15);
+    SET_NTH_BIT(ram_buf[0], 16);
+    SET_NTH_BIT(ram_buf[0], 17);
+
+    SET_NTH_BIT(ram_buf[2], 14);
+    SET_NTH_BIT(ram_buf[2], 17);
+}
+
+void show_number_one_in_five() {
+    SET_NTH_BIT(ram_buf[0], 18);
+    SET_NTH_BIT(ram_buf[2], 13);
+}
+
+void show_number_two_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
+    SET_NTH_BIT(ram_buf[0], 12); // 5E
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+}
+
+void show_number_three_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18);
+    SET_NTH_BIT(ram_buf[0], 18);
+    SET_NTH_BIT(ram_buf[2], 13);
+    SET_NTH_BIT(ram_buf[2], 12);
+    SET_NTH_BIT(ram_buf[0], 19);
+    SET_NTH_BIT(ram_buf[0], 13);
+}
+
+void show_number_four_in_five() {
+    SET_NTH_BIT(ram_buf[0], 18);
+    SET_NTH_BIT(ram_buf[2], 13);
+    SET_NTH_BIT(ram_buf[2], 19);
+    SET_NTH_BIT(ram_buf[0], 19);
+    SET_NTH_BIT(ram_buf[0], 13);
+}
+
+void show_number_five_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+}
+
+void show_number_six_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[0], 12); // 5E
+}
+
+void show_number_seven_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+}
+
+void show_number_eight_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[0], 12); // 5E
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+}
+
+void show_number_nine_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+}
+
+void show_number_zero_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+    SET_NTH_BIT(ram_buf[0], 12); // 5E
+}
+
+void show_digit_in_five(int digit) {
+        zero_ram_buf();
+        switch(digit) {
+            case 0:
+                show_number_zero_in_five();
+                break;
+            case 1:
+                show_number_one_in_five();
+                break;
+            case 2:
+                show_number_two_in_five();
+                break;
+            case 3:
+                show_number_three_in_five();
+                break;
+            case 4:
+                show_number_four_in_five();
+                break;
+            case 5:
+                show_number_five_in_five();
+                break;
+            case 6:
+                show_number_six_in_five();
+                break;
+            case 7:
+                show_number_seven_in_five();
+                break;
+            case 8:
+                show_number_eight_in_five();
+                break;
+            case 9:
+                show_number_nine_in_five();
+                break;
+            default:
+                fill_ram_buf();
+                break;
+        }
+        commit_lcd_ram_buf();
+}
+
+void demo_loop_numbers() {
+    int i = 0;
+    while (1) {
+        show_digit_in_five(i);
+        delay(4000);
+        i++;
+        i %= 10;
     }
 }
 
 int main() {
+    // Initialization
     asm("nop");
     asm("nop");
     init_gpio_clocks();
-    /* blink_led(3); */
 
     set_gpio_moder_to_af();
     set_gpio_af_modes();
@@ -312,30 +460,28 @@ int main() {
     init_lcd();
     zero_ram_buf();
 
-    // ready conf:
-    ram_buf[0] = (0xc << 12) | (0x3 << 16);
-    ram_buf[2] = (0x4 << 12) | (0x2 << 16);
+    // Program starts
+    blink_led(10);
 
-    //ram_buf[0] = 0xffffffff;
-    //ram_buf[2] = 0xffffffff;
-    //ram_buf[3] = 0xffffffff;
-    //ram_buf[4] = 0xffffffff;
-    //ram_buf[5] = 0xffffffff;
-    //ram_buf[6] = 0xffffffff;
-    copy_lcd_ram_buf();
+    //demo_loop_numbers();
+
+    fill_ram_buf();
+    //ram_buf[2] = FULL_32;
+    //ram_buf[2] |= 0xf << 16;
+    //SET_NTH_BIT(ram_buf[2], 19);
+    commit_lcd_ram_buf();
     while(1);
 
     while (1) {
-        /* write_full_buf(); */
-        /* fill_ram_buf(); */
-        write_next_pixel();
-        copy_lcd_ram_buf();
-        delay(200);
+        zero_ram_buf();
+        write_full_buf();
+        commit_lcd_ram_buf();
+        delay(4000);
         /* delay_hack(); */
 
         /* show_empty_screen(); */
-        if (ram_buf_idx >= RAM_BUFS)
-            break;
+        /* if (ram_buf_idx >= RAM_BUFS) */
+        /*     break; */
     }
     /* delay(4000); */
     /* blink_led(5); */
