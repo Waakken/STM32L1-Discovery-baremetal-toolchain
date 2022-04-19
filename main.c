@@ -31,23 +31,23 @@ struct lcd_pixel {
 struct lcd_pixel pixels_for_digit_low[6][8] =
     {
         //            A        B        C        D        E        F        G        H
-        /* 0 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 1 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 2 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 3 */ {{1, 20}, {0, 20}, {1, 11}, {1, 10}, {0, 10}, {1, 21}, {0, 00}, {0, 00}},
-        /* 4 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 5 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}}
+        /* 0 */ {{1, 40}, {0, 40}, {1,  1}, {1,  0}, {0,  0}, {1, 41}, {0, 41}, {2, 13}},
+        /* 1 */ {{1, 26}, {0, 26}, {1,  7}, {1,  2}, {0,  2}, {1, 27}, {0, 27}, {2, 13}},
+        /* 2 */ {{1, 24}, {0, 24}, {1,  9}, {1,  8}, {0,  8}, {1, 25}, {0, 25}, {2, 13}},
+        /* 3 */ {{1, 20}, {0, 20}, {1, 11}, {1, 10}, {0, 10}, {1, 21}, {0, 21}, {2, 13}},
+        /* 4 */ {{1, 18}, {0, 18}, {1, 13}, {1, 12}, {0, 12}, {1, 19}, {0, 19}, {2, 13}},
+        /* 5 */ {{1, 17}, {0, 17}, {1, 15}, {1, 14}, {0, 14}, {1, 16}, {0, 16}, {2, 13}}
     };
 
 struct lcd_pixel pixels_for_digit_high[6][9] =
     {
         //            I        J        K        L        M        N        O        P        Q
-        /* 0 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 1 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 2 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 3 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 4 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
-        /* 5 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}}
+        /* 0 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  1}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 1 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  7}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 2 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  9}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 3 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 11}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 4 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 13}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 5 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 15}, {2, 13}, {2, 13}, {2, 13}, {2, 13}}
     };
 
 // Digit pixel mappings
@@ -79,19 +79,12 @@ void display_digit_in_location(int digit, int location);
 void display_pixel(struct lcd_pixel pix)
 {
     int ram_buf_idx = pix.com * 2;
-    SET_NTH_BIT(ram_buf[ram_buf_idx], pix.seg);
-}
-
-struct lcd_pixel map_pixel(int digit, int segment)
-{
-    /*
-     * args:
-     *   -digit = Digit location on LCD display (0-5)
-     *   -segment/pixel = Pixel to display (A-Q)
-     */
-
-    // TODO: Add support for high/low checking
-    return pixels_for_digit_low[digit][segment];
+    int segment = pix.seg;
+    if (segment > 31) {
+        segment -= 32;
+        ram_buf_idx++;
+    }
+    SET_NTH_BIT(ram_buf[ram_buf_idx], segment);
 }
 
 struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
@@ -102,14 +95,18 @@ struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
      *   -segment/pixel = Pixel to display (A-Q)
      */
 
-    // TODO: Add support for high/low checking
-    // Also add support for checking arguments
-    int segment = alphabet - 'A';
-    return pixels_for_digit_low[digit][segment];
+    // TODO: Add support for checking arguments
+    if (alphabet > 'H') {
+        int segment = alphabet - 'I';
+        return pixels_for_digit_high[digit][segment];
+    } else {
+        int segment = alphabet - 'A';
+        return pixels_for_digit_low[digit][segment];
+    }
 }
 
 int strlen(const char *str) {
-    // TODO: Think through
+    // TODO: Test
     /* int i = 0; */
     /* for (; str[i]; i++); */
     /* return i; */
@@ -118,6 +115,7 @@ int strlen(const char *str) {
 
 void display_string(const char *str)
 {
+    // TODO: Use strlen to check input
     for (int i = 0; i < 6; i++) {
         int digit_idx = str[i] - '0';
         display_digit_in_location(digit_idx, i);
@@ -672,13 +670,14 @@ int main() {
     // DEMO
     /* show_number_zero_in_four(); */
     /* show_number_eight_in_five(); */
-    //display_string("77777777");
-     display_digit_in_location(7, 3);
+    display_string("123456");
+    //display_string("888888");
+
 
     /* fill_ram_buf(); */
-    //ram_buf[2] = FULL_32;
-    //ram_buf[2] |= 0xf << 16;
-    //SET_NTH_BIT(ram_buf[2], 16);
+    //ram_buf[4] = FULL_32;
+    //ram_buf[4] |= 0xf << 12;
+    //SET_NTH_BIT(ram_buf[4], 13);
     commit_lcd_ram_buf();
     while(1);
 
