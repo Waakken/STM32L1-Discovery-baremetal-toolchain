@@ -22,9 +22,107 @@ int ram_buf_idx = 0;
 #define SET_NTH_BIT(reg, nth) ((reg) |= (1 << (nth)))
 #define FULL_32 (0xffffffff)
 
+struct lcd_pixel {
+    int com;
+    int seg;
+};
+
+// LCD pixel mappings
+struct lcd_pixel pixels_for_digit_low[6][8] =
+    {
+        //            A        B        C        D        E        F        G        H
+        /* 0 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 1 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 2 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 3 */ {{1, 20}, {0, 20}, {1, 11}, {1, 10}, {0, 10}, {1, 21}, {0, 00}, {0, 00}},
+        /* 4 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 5 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}}
+    };
+
+struct lcd_pixel pixels_for_digit_high[6][9] =
+    {
+        //            I        J        K        L        M        N        O        P        Q
+        /* 0 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 1 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 2 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 3 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 4 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}},
+        /* 5 */ {{0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}, {0, 00}}
+    };
+
+// Digit pixel mappings
+#define DIGITS 10
+#define PIXELS_PER_DIGIT 14
+const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] =
+    {
+        /* 0 */ {"ABCDEFQQQQQQQQ"},
+        /* 1 */ {"BCQQQQQQQQQQQQ"},
+        /* 2 */ {"ABDEMGQQQQQQQQ"},
+        /* 3 */ {"ABCDGMQQQQQQQQ"},
+        /* 4 */ {"BCFGMQQQQQQQQQ"},
+        /* 5 */ {"ACDFGMQQQQQQQQ"},
+        /* 6 */ {"AFDGMCEQQQQQQQ"},
+        /* 7 */ {"ABCQQQQQQQQQQQ"},
+        /* 8 */ {"ABCDGMFEQQQQQQ"},
+        /* 9 */ {"AFDGMCBQQQQQQQ"}
+    };
+
 // forward declarations
 void blink_led(int count);
 void show_digit_in_five(int digit);
+void display_pixel(struct lcd_pixel);
+void display_string(const char *str);
+struct lcd_pixel map_pixel_alphabet(int digit, int alphabet);
+void display_digit_in_location(int digit, int location);
+
+// definitions
+void display_pixel(struct lcd_pixel pix)
+{
+    int ram_buf_idx = pix.com * 2;
+    SET_NTH_BIT(ram_buf[ram_buf_idx], pix.seg);
+}
+
+struct lcd_pixel map_pixel(int digit, int segment)
+{
+    /*
+     * args:
+     *   -digit = Digit location on LCD display (0-5)
+     *   -segment/pixel = Pixel to display (A-Q)
+     */
+
+    // TODO: Add support for high/low checking
+    return pixels_for_digit_low[digit][segment];
+}
+
+struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
+{
+    /*
+     * args:
+     *   -digit = Digit location on LCD display (0-5)
+     *   -segment/pixel = Pixel to display (A-Q)
+     */
+
+    // TODO: Add support for high/low checking
+    // Also add support for checking arguments
+    int segment = alphabet - 'A';
+    return pixels_for_digit_low[digit][segment];
+}
+
+int strlen(const char *str) {
+    // TODO: Think through
+    /* int i = 0; */
+    /* for (; str[i]; i++); */
+    /* return i; */
+    return PIXELS_PER_DIGIT;
+}
+
+void display_string(const char *str)
+{
+    for (int i = 0; i < 6; i++) {
+        int digit_idx = str[i] - '0';
+        display_digit_in_location(digit_idx, i);
+    }
+}
 
 void fill_ram_buf()
 {
@@ -309,9 +407,113 @@ void show_number_two_in_six() {
     SET_NTH_BIT(ram_buf[2], 17);
 }
 
+/***** 4 *****/
+
+void show_number_zero_in_four() {
+    struct lcd_pixel pix = map_pixel_alphabet(3, 'A');
+    display_pixel(pix);
+    pix = map_pixel_alphabet(3, 'B');
+    display_pixel(pix);
+    pix = map_pixel_alphabet(3, 'C');
+    display_pixel(pix);
+    pix = map_pixel_alphabet(3, 'D');
+    display_pixel(pix);
+    pix = map_pixel_alphabet(3, 'E');
+    display_pixel(pix);
+    pix = map_pixel_alphabet(3, 'F');
+    display_pixel(pix);
+}
+
+void show_number_one_in_four() {
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+}
+
+void show_number_two_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+    SET_NTH_BIT(ram_buf[0], 10); // 4E
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+}
+
+void show_number_three_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+}
+
+void show_number_four_in_four() {
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+    SET_NTH_BIT(ram_buf[2], 21); // 4F
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+}
+
+void show_number_five_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+    SET_NTH_BIT(ram_buf[2], 21); // 4F
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+}
+
+void show_number_six_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[2], 21); // 4F
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+    SET_NTH_BIT(ram_buf[0], 10); // 4E
+}
+
+void show_number_seven_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+}
+
+void show_number_eight_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+    SET_NTH_BIT(ram_buf[2], 21); // 4F
+    SET_NTH_BIT(ram_buf[0], 10); // 4E
+}
+
+void show_number_nine_in_four() {
+    SET_NTH_BIT(ram_buf[2], 20); // 4A
+    SET_NTH_BIT(ram_buf[2], 21); // 4F
+    SET_NTH_BIT(ram_buf[2], 10); // 4D
+    SET_NTH_BIT(ram_buf[0], 21); // 4G
+    SET_NTH_BIT(ram_buf[0], 11); // 4M
+    SET_NTH_BIT(ram_buf[2], 11); // 4C
+    SET_NTH_BIT(ram_buf[0], 20); // 4B
+}
+
+/***** 5 *****/
+void show_number_zero_in_five() {
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[2], 12); // 5D
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+    SET_NTH_BIT(ram_buf[0], 12); // 5E
+}
+
 void show_number_one_in_five() {
-    SET_NTH_BIT(ram_buf[0], 18);
-    SET_NTH_BIT(ram_buf[2], 13);
+    SET_NTH_BIT(ram_buf[2], 18); // 5A
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
 }
 
 void show_number_two_in_five() {
@@ -333,11 +535,11 @@ void show_number_three_in_five() {
 }
 
 void show_number_four_in_five() {
-    SET_NTH_BIT(ram_buf[0], 18);
-    SET_NTH_BIT(ram_buf[2], 13);
-    SET_NTH_BIT(ram_buf[2], 19);
-    SET_NTH_BIT(ram_buf[0], 19);
-    SET_NTH_BIT(ram_buf[0], 13);
+    SET_NTH_BIT(ram_buf[0], 18); // 5B
+    SET_NTH_BIT(ram_buf[2], 13); // 5C
+    SET_NTH_BIT(ram_buf[2], 19); // 5F
+    SET_NTH_BIT(ram_buf[0], 19); // 5G
+    SET_NTH_BIT(ram_buf[0], 13); // 5M
 }
 
 void show_number_five_in_five() {
@@ -384,15 +586,6 @@ void show_number_nine_in_five() {
     SET_NTH_BIT(ram_buf[0], 13); // 5M
     SET_NTH_BIT(ram_buf[2], 13); // 5C
     SET_NTH_BIT(ram_buf[0], 18); // 5B
-}
-
-void show_number_zero_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-    SET_NTH_BIT(ram_buf[0], 12); // 5E
 }
 
 void show_digit_in_five(int digit) {
@@ -445,6 +638,18 @@ void demo_loop_numbers() {
     }
 }
 
+void display_digit_in_location(int digit, int location)
+{
+    int digit_idx = digit;
+    const char *str_for_digit = digit_pixel_mappings[digit_idx];
+    struct lcd_pixel pix;
+    for (int j = 0; j < PIXELS_PER_DIGIT; j++) {
+        char segment = str_for_digit[j];
+        pix = map_pixel_alphabet(location, segment);
+        display_pixel(pix);
+    }
+}
+
 int main() {
     // Initialization
     asm("nop");
@@ -461,14 +666,19 @@ int main() {
     zero_ram_buf();
 
     // Program starts
-    blink_led(10);
+    //blink_led(10);
 
     //demo_loop_numbers();
+    // DEMO
+    /* show_number_zero_in_four(); */
+    /* show_number_eight_in_five(); */
+    //display_string("77777777");
+     display_digit_in_location(7, 3);
 
-    fill_ram_buf();
+    /* fill_ram_buf(); */
     //ram_buf[2] = FULL_32;
     //ram_buf[2] |= 0xf << 16;
-    //SET_NTH_BIT(ram_buf[2], 19);
+    //SET_NTH_BIT(ram_buf[2], 16);
     commit_lcd_ram_buf();
     while(1);
 

@@ -19,11 +19,13 @@ display/x $r7
 
 #break *0x8000190
 
+break *0x80001cc
+
 # main
-break *0x8000302
+#break *0x8000302
 
 # init_lcd
-break *0x80001a0
+#break *0x80001a0
 
 # lcd loop
 #break *0x80001be
