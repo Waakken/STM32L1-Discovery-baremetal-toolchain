@@ -19,7 +19,8 @@ display/x $r7
 
 #break *0x8000190
 
-break *0x80001cc
+# strlen
+break *0x80001d4
 
 # main
 #break *0x8000302

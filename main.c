@@ -106,17 +106,14 @@ struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
 }
 
 int strlen(const char *str) {
-    // TODO: Test
-    /* int i = 0; */
-    /* for (; str[i]; i++); */
-    /* return i; */
-    return PIXELS_PER_DIGIT;
+    int i = 0;
+    for (; str[i]; i++);
+    return i;
 }
 
 void display_string(const char *str)
 {
-    // TODO: Use strlen to check input
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < strlen(str); i++) {
         int digit_idx = str[i] - '0';
         display_digit_in_location(digit_idx, i);
     }
@@ -670,7 +667,7 @@ int main() {
     // DEMO
     /* show_number_zero_in_four(); */
     /* show_number_eight_in_five(); */
-    display_string("123456");
+    display_string("12345");
     //display_string("888888");
 
 
