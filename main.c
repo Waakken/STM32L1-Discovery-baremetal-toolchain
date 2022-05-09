@@ -27,7 +27,20 @@ struct lcd_pixel {
     int seg;
 };
 
+/*
+Digits and characters are expressed as letters describing segments: A-Q.
+
+   A
+ H J K
+F     B
+  G M
+E     C
+ Q P N
+   D
+*/
+
 // LCD pixel mappings
+// 2, 13 is the 'default': not yet implemented.
 struct lcd_pixel pixels_for_digit_low[6][8] =
     {
         //            A        B        C        D        E        F        G        H
@@ -382,254 +395,12 @@ int delay_hack() {
 
 void blink_led(int count) {
     for (int i = 0; i < count; i++) {
-        show_digit_in_five(i);
         turn_on_led();
         delay(3000);
         //delay_hack();
         turn_off_led();
         delay(3000);
         //delay_hack();
-    }
-}
-
-void show_number_two_in_six() {
-    SET_NTH_BIT(ram_buf[0], 14);
-    SET_NTH_BIT(ram_buf[0], 15);
-    SET_NTH_BIT(ram_buf[0], 16);
-    SET_NTH_BIT(ram_buf[0], 17);
-
-    SET_NTH_BIT(ram_buf[2], 14);
-    SET_NTH_BIT(ram_buf[2], 17);
-}
-
-/***** 4 *****/
-
-void show_number_zero_in_four() {
-    struct lcd_pixel pix = map_pixel_alphabet(3, 'A');
-    display_pixel(pix);
-    pix = map_pixel_alphabet(3, 'B');
-    display_pixel(pix);
-    pix = map_pixel_alphabet(3, 'C');
-    display_pixel(pix);
-    pix = map_pixel_alphabet(3, 'D');
-    display_pixel(pix);
-    pix = map_pixel_alphabet(3, 'E');
-    display_pixel(pix);
-    pix = map_pixel_alphabet(3, 'F');
-    display_pixel(pix);
-}
-
-void show_number_one_in_four() {
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-}
-
-void show_number_two_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-    SET_NTH_BIT(ram_buf[0], 10); // 4E
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-}
-
-void show_number_three_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-}
-
-void show_number_four_in_four() {
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-    SET_NTH_BIT(ram_buf[2], 21); // 4F
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-}
-
-void show_number_five_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-    SET_NTH_BIT(ram_buf[2], 21); // 4F
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-}
-
-void show_number_six_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[2], 21); // 4F
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-    SET_NTH_BIT(ram_buf[0], 10); // 4E
-}
-
-void show_number_seven_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-}
-
-void show_number_eight_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-    SET_NTH_BIT(ram_buf[2], 21); // 4F
-    SET_NTH_BIT(ram_buf[0], 10); // 4E
-}
-
-void show_number_nine_in_four() {
-    SET_NTH_BIT(ram_buf[2], 20); // 4A
-    SET_NTH_BIT(ram_buf[2], 21); // 4F
-    SET_NTH_BIT(ram_buf[2], 10); // 4D
-    SET_NTH_BIT(ram_buf[0], 21); // 4G
-    SET_NTH_BIT(ram_buf[0], 11); // 4M
-    SET_NTH_BIT(ram_buf[2], 11); // 4C
-    SET_NTH_BIT(ram_buf[0], 20); // 4B
-}
-
-/***** 5 *****/
-void show_number_zero_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-    SET_NTH_BIT(ram_buf[0], 12); // 5E
-}
-
-void show_number_one_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-}
-
-void show_number_two_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-    SET_NTH_BIT(ram_buf[0], 12); // 5E
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-}
-
-void show_number_three_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18);
-    SET_NTH_BIT(ram_buf[0], 18);
-    SET_NTH_BIT(ram_buf[2], 13);
-    SET_NTH_BIT(ram_buf[2], 12);
-    SET_NTH_BIT(ram_buf[0], 19);
-    SET_NTH_BIT(ram_buf[0], 13);
-}
-
-void show_number_four_in_five() {
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-}
-
-void show_number_five_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-}
-
-void show_number_six_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[0], 12); // 5E
-}
-
-void show_number_seven_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-}
-
-void show_number_eight_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[0], 12); // 5E
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-}
-
-void show_number_nine_in_five() {
-    SET_NTH_BIT(ram_buf[2], 18); // 5A
-    SET_NTH_BIT(ram_buf[2], 19); // 5F
-    SET_NTH_BIT(ram_buf[2], 12); // 5D
-    SET_NTH_BIT(ram_buf[0], 19); // 5G
-    SET_NTH_BIT(ram_buf[0], 13); // 5M
-    SET_NTH_BIT(ram_buf[2], 13); // 5C
-    SET_NTH_BIT(ram_buf[0], 18); // 5B
-}
-
-void show_digit_in_five(int digit) {
-        zero_ram_buf();
-        switch(digit) {
-            case 0:
-                show_number_zero_in_five();
-                break;
-            case 1:
-                show_number_one_in_five();
-                break;
-            case 2:
-                show_number_two_in_five();
-                break;
-            case 3:
-                show_number_three_in_five();
-                break;
-            case 4:
-                show_number_four_in_five();
-                break;
-            case 5:
-                show_number_five_in_five();
-                break;
-            case 6:
-                show_number_six_in_five();
-                break;
-            case 7:
-                show_number_seven_in_five();
-                break;
-            case 8:
-                show_number_eight_in_five();
-                break;
-            case 9:
-                show_number_nine_in_five();
-                break;
-            default:
-                fill_ram_buf();
-                break;
-        }
-        commit_lcd_ram_buf();
-}
-
-void demo_loop_numbers() {
-    int i = 0;
-    while (1) {
-        show_digit_in_five(i);
-        delay(4000);
-        i++;
-        i %= 10;
     }
 }
 
@@ -663,13 +434,8 @@ int main() {
     // Program starts
     //blink_led(10);
 
-    //demo_loop_numbers();
-    // DEMO
-    /* show_number_zero_in_four(); */
-    /* show_number_eight_in_five(); */
-    display_string("12345");
+    display_string("123456");
     //display_string("888888");
-
 
     /* fill_ram_buf(); */
     //ram_buf[4] = FULL_32;
