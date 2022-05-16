@@ -1,6 +1,11 @@
 #include "reg_defs.h"
 #include "reg_addr.h"
 
+#ifdef __x86_64
+#include <stdio.h>
+#include <stdlib.h>
+#endif
+
 struct gpio *gpioa = (struct gpio *)GPIOA;
 struct gpio *gpiob = (struct gpio *)GPIOB;
 struct gpio *gpioc = (struct gpio *)GPIOC;
@@ -124,8 +129,12 @@ int my_strlen(const char *str) {
     return i;
 }
 
+
 void display_string(const char *str)
 {
+#ifdef __x86_64
+    printf("Displaying: %s\n", str);
+#endif
     for (int i = 0; i < my_strlen(str); i++) {
         int digit_idx = str[i] - '0';
         display_digit_in_location(digit_idx, i);
@@ -426,7 +435,29 @@ const char *int_to_str(int num)
     return digit_str;
 }
 
+#ifdef __x86_64
+void redirect_pointers_in_x86()
+{
+    // TODO: Allocate contiguous area, with size of 0x40023800 - 0x40000000
+    gpioa = malloc(sizeof(struct gpio));
+    gpiob = malloc(sizeof(struct gpio));
+    gpioc = malloc(sizeof(struct gpio));
+    gpiod = malloc(sizeof(struct gpio));
+    gpioe = malloc(sizeof(struct gpio));
+    rcc = malloc(sizeof(struct rcc));
+    tim2 = malloc(sizeof(struct tim2));
+    rtc = malloc(sizeof(struct rtc));
+    lcd = malloc(sizeof(struct lcd));
+    pwr = malloc(sizeof(struct pwr));
+}
+#endif
+
 int main() {
+#ifdef __x86_64
+    printf("Redirecting pointers\n");
+    redirect_pointers_in_x86();
+    printf("Initializing\n");
+#endif
     // Initialization
     asm("nop");
     asm("nop");
@@ -441,11 +472,14 @@ int main() {
     init_lcd();
     zero_ram_buf();
 
+#ifdef __x86_64
+    printf("Program starts\n");
+#endif
     // Program starts
     //blink_led(10);
 
-    display_string("123456");
-    //display_string("888888");
+    //display_string("123456");
+    display_string("888888");
 
     // Use following lines for manually scanning pixels through
     //ram_buf[4] = FULL_32;
@@ -457,12 +491,10 @@ int main() {
     delay_hack();
     //while(1);
 
-    int i = 0;
-    while (1) {
+    for (int i = 0; i < 10; i++) {
         zero_ram_buf();
         const char *str = int_to_str(i);
         display_string(str);
-        i++;
         /* write_full_buf(); */
         commit_lcd_ram_buf();
         /* delay(4000); */
@@ -474,7 +506,9 @@ int main() {
     }
     /* delay(4000); */
     /* blink_led(5); */
+#ifndef __x86_64
     while(1);
+#endif
 
     return 0;
 }
