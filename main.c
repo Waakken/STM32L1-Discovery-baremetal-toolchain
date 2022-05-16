@@ -118,7 +118,7 @@ struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
     }
 }
 
-int strlen(const char *str) {
+int my_strlen(const char *str) {
     int i = 0;
     for (; str[i]; i++);
     return i;
@@ -126,7 +126,7 @@ int strlen(const char *str) {
 
 void display_string(const char *str)
 {
-    for (int i = 0; i < strlen(str); i++) {
+    for (int i = 0; i < my_strlen(str); i++) {
         int digit_idx = str[i] - '0';
         display_digit_in_location(digit_idx, i);
     }
@@ -389,7 +389,7 @@ void delay(unsigned ms)
 }
 
 int delay_hack() {
-    for (int i = 0; i < 400000; i++)
+    for (int i = 0; i < 800000; i++)
         asm("nop");
 }
 
@@ -416,6 +416,16 @@ void display_digit_in_location(int digit, int location)
     }
 }
 
+char digit_str[6] = {0, 0, 0, 0, 0, 0};
+const char *int_to_str(int num)
+{
+    for (int i = 0; i < 6; i++)
+        digit_str[i] = 0;
+
+    digit_str[0] = num + '0';
+    return digit_str;
+}
+
 int main() {
     // Initialization
     asm("nop");
@@ -437,19 +447,26 @@ int main() {
     display_string("123456");
     //display_string("888888");
 
-    /* fill_ram_buf(); */
+    // Use following lines for manually scanning pixels through
     //ram_buf[4] = FULL_32;
     //ram_buf[4] |= 0xf << 12;
     //SET_NTH_BIT(ram_buf[4], 13);
-    commit_lcd_ram_buf();
-    while(1);
 
+    commit_lcd_ram_buf();
+    //delay(400);
+    delay_hack();
+    //while(1);
+
+    int i = 0;
     while (1) {
         zero_ram_buf();
-        write_full_buf();
+        const char *str = int_to_str(i);
+        display_string(str);
+        i++;
+        /* write_full_buf(); */
         commit_lcd_ram_buf();
-        delay(4000);
-        /* delay_hack(); */
+        /* delay(4000); */
+        delay_hack();
 
         /* show_empty_screen(); */
         /* if (ram_buf_idx >= RAM_BUFS) */
