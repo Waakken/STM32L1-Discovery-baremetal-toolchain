@@ -70,19 +70,19 @@ struct lcd_pixel pixels_for_digit_high[6][9] =
 
 // Digit pixel mappings
 #define DIGITS 10
-#define PIXELS_PER_DIGIT 14
+#define PIXELS_PER_DIGIT 15
 const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] =
     {
-        /* 0 */ {"ABCDEFQQQQQQQQ"},
-        /* 1 */ {"BCQQQQQQQQQQQQ"},
-        /* 2 */ {"ABDEMGQQQQQQQQ"},
-        /* 3 */ {"ABCDGMQQQQQQQQ"},
-        /* 4 */ {"BCFGMQQQQQQQQQ"},
-        /* 5 */ {"ACDFGMQQQQQQQQ"},
-        /* 6 */ {"AFDGMCEQQQQQQQ"},
-        /* 7 */ {"ABCQQQQQQQQQQQ"},
-        /* 8 */ {"ABCDGMFEQQQQQQ"},
-        /* 9 */ {"AFDGMCBQQQQQQQ"}
+        /* 0 */ {"ABCDEF"},
+        /* 1 */ {"BC"},
+        /* 2 */ {"ABDEMG"},
+        /* 3 */ {"ABCDGM"},
+        /* 4 */ {"BCFGM"},
+        /* 5 */ {"ACDFGM"},
+        /* 6 */ {"AFDGMCE"},
+        /* 7 */ {"ABC"},
+        /* 8 */ {"ABCDGMFE"},
+        /* 9 */ {"AFDGMCB"}
     };
 
 // forward declarations
@@ -417,8 +417,11 @@ void display_digit_in_location(int digit, int location)
 {
     int digit_idx = digit;
     const char *str_for_digit = digit_pixel_mappings[digit_idx];
+#ifdef __x86_64
+    printf("digit: %u, location: %u, str_for_digit: %s\n", digit, location, str_for_digit);
+#endif
     struct lcd_pixel pix;
-    for (int j = 0; j < PIXELS_PER_DIGIT; j++) {
+    for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
         pix = map_pixel_alphabet(location, segment);
         display_pixel(pix);
@@ -478,8 +481,8 @@ int main() {
     // Program starts
     //blink_led(10);
 
-    //display_string("123456");
-    display_string("888888");
+    display_string("123456");
+    //display_string("888888");
 
     // Use following lines for manually scanning pixels through
     //ram_buf[4] = FULL_32;
