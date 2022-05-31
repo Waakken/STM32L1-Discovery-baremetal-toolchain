@@ -1,5 +1,5 @@
-#include "reg_defs.h"
 #include "reg_addr.h"
+#include "reg_defs.h"
 
 #ifdef __x86_64
 #include <stdio.h>
@@ -46,6 +46,7 @@ E     C
 
 // LCD pixel mappings
 // 2, 13 is the 'default': not yet implemented.
+// clang-format off
 struct lcd_pixel pixels_for_digit_low[6][8] =
     {
         //            A        B        C        D        E        F        G        H
@@ -67,23 +68,22 @@ struct lcd_pixel pixels_for_digit_high[6][9] =
         /* 4 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 13}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
         /* 5 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 15}, {2, 13}, {2, 13}, {2, 13}, {2, 13}}
     };
+// clang-format on
 
 // Digit pixel mappings
 #define DIGITS 10
 #define PIXELS_PER_DIGIT 15
-const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] =
-    {
-        /* 0 */ {"ABCDEF"},
-        /* 1 */ {"BC"},
-        /* 2 */ {"ABDEMG"},
-        /* 3 */ {"ABCDGM"},
-        /* 4 */ {"BCFGM"},
-        /* 5 */ {"ACDFGM"},
-        /* 6 */ {"AFDGMCE"},
-        /* 7 */ {"ABC"},
-        /* 8 */ {"ABCDGMFE"},
-        /* 9 */ {"AFDGMCB"}
-    };
+const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
+    /* 0 */ {"ABCDEF"},
+    /* 1 */ {"BC"},
+    /* 2 */ {"ABDEMG"},
+    /* 3 */ {"ABCDGM"},
+    /* 4 */ {"BCFGM"},
+    /* 5 */ {"ACDFGM"},
+    /* 6 */ {"AFDGMCE"},
+    /* 7 */ {"ABC"},
+    /* 8 */ {"ABCDGMFE"},
+    /* 9 */ {"AFDGMCB"}};
 
 // forward declarations
 void blink_led(int count);
@@ -123,12 +123,13 @@ struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
     }
 }
 
-int my_strlen(const char *str) {
+int my_strlen(const char *str)
+{
     int i = 0;
-    for (; str[i]; i++);
+    for (; str[i]; i++)
+        ;
     return i;
 }
-
 
 void display_string(const char *str)
 {
@@ -152,7 +153,7 @@ void write_next_pixel()
 {
     ram_buf[ram_buf_idx] |= (1 << ram_pixel_idx);
     ram_pixel_idx++;
-    if (ram_pixel_idx > 31){
+    if (ram_pixel_idx > 31) {
         ram_pixel_idx = 0;
         ram_buf_idx++;
         blink_led(3);
@@ -213,29 +214,29 @@ void zero_lcd_bits()
 void init_lcd()
 {
     // bias 1/2
-    //lcd->cr |=  (1 << 5);
+    // lcd->cr |=  (1 << 5);
 
     // bias 1/3
-    lcd->cr |=  (1 << 6);
+    lcd->cr |= (1 << 6);
 
     // bias 1/4
     // = 0
 
     // duty 1/2
-    //lcd->cr |= (1 << 2);
+    // lcd->cr |= (1 << 2);
 
     // duty 1/3
-    //lcd->cr |= (1 << 3);
+    // lcd->cr |= (1 << 3);
 
     // duty 1/4
     lcd->cr |= (3 << 2);
 
     // duty 1/8
-    //lcd->cr |= (1 << 4);
+    // lcd->cr |= (1 << 4);
 
     // contrast 111
     /* lcd->fcr |=  (3 << 10); */
-    lcd->fcr |=  (7 << 10);
+    lcd->fcr |= (7 << 10);
 
     // pulse width
     /* lcd->fcr |= (7 << 4); */
@@ -263,7 +264,7 @@ void init_clocks_for_lcd()
 
     // pwr->cr Looks OK!
     // Disable backup write protection
-    pwr->cr |=  (1 << 8);
+    pwr->cr |= (1 << 8);
 
     // rcc->csr Looks OK!
     // enable LSI
@@ -279,9 +280,7 @@ void init_clocks_for_lcd()
     rcc->apb1enr |= (1 << 9);
 }
 
-void init_gpio_clocks() {
-    rcc->ahbenr |= 0x1f;
-}
+void init_gpio_clocks() { rcc->ahbenr |= 0x1f; }
 
 void set_gpio_moder_to_af()
 {
@@ -356,14 +355,11 @@ void set_gpio_af_modes()
 
 void turn_on_led()
 {
-  gpioa->moder |= 1;
-  gpioa->odr |= 1;
+    gpioa->moder |= 1;
+    gpioa->odr |= 1;
 }
 
-void turn_off_led()
-{
-  gpioa->odr &= ~1;
-}
+void turn_off_led() { gpioa->odr &= ~1; }
 
 void delay(unsigned ms)
 {
@@ -394,22 +390,31 @@ void delay(unsigned ms)
     /* enable tim2 */
     tim2->cr1 |= 1;
 
-    while(!tim2->sr);
+    while (!tim2->sr)
+        ;
 }
 
-int delay_hack() {
+int delay_hack_1_second()
+{
     for (int i = 0; i < 800000; i++)
         asm("nop");
 }
 
-void blink_led(int count) {
+int delay_hack_10_us()
+{
+    for (int i = 0; i < 8000; i++)
+        asm("nop");
+}
+
+void blink_led(int count)
+{
     for (int i = 0; i < count; i++) {
         turn_on_led();
         delay(3000);
-        //delay_hack();
+        // delay_hack_1_second();
         turn_off_led();
         delay(3000);
-        //delay_hack();
+        // delay_hack_1_second();
     }
 }
 
@@ -418,7 +423,8 @@ void display_digit_in_location(int digit, int location)
     int digit_idx = digit;
     const char *str_for_digit = digit_pixel_mappings[digit_idx];
 #ifdef __x86_64
-    printf("digit: %u, location: %u, str_for_digit: %s\n", digit, location, str_for_digit);
+    printf("%s digit: %u, location: %u, str_for_digit: %s\n", __func__, digit,
+           location, str_for_digit);
 #endif
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
@@ -428,20 +434,70 @@ void display_digit_in_location(int digit, int location)
     }
 }
 
+// TODO: Use definition instead of magic number
 char digit_str[6] = {0, 0, 0, 0, 0, 0};
+
+int count_digits(int num)
+{
+    // TODO: Use definition instead of magic number
+    int pow_10 = 10;
+    int i = 1;
+    for (; i < 7; i++) {
+#ifdef __x86_64
+        printf("%s num: %u loop: %u pow 10: %u\n", __func__, num, i, pow_10);
+#endif
+        int div = num / pow_10;
+        if (!div)
+            break;
+        pow_10 *= 10;
+    }
+#ifdef __x86_64
+    printf("%s num: %u has %u digits\n", __func__, num, i);
+#endif
+    return i;
+}
 const char *int_to_str(int num)
 {
+    // Reinitialize digit_str buffer
     for (int i = 0; i < 6; i++)
         digit_str[i] = 0;
 
-    digit_str[0] = num + '0';
+    int digits = count_digits(num);
+
+    int pow_10 = 10;
+
+    // First digit:
+    int cur_digit = num % pow_10;
+    digit_str[5] = cur_digit + '0';
+
+    pow_10 *= 10;
+
+    int digit_str_index = 4;
+    for (int i = 1; i < 6; i++)
+    // for (int i = 0; i < digits; i++)
+    {
+        // TODO: Add support for first digit
+        int mod = num % pow_10;
+        cur_digit = mod / (pow_10 / 10);
+        digit_str[digit_str_index] = cur_digit + '0';
+        // digit_str[0] = num + '0';
+#ifdef __x86_64
+        printf("%s digits: %u num: %u loop: %u pow 10: %u, cur "
+               "digit: %u, mod: %u, "
+               "str: %s\n",
+               __func__, digits, num, i, pow_10, cur_digit, mod, digit_str);
+#endif
+        pow_10 *= 10;
+        digit_str_index--;
+    }
     return digit_str;
 }
 
 #ifdef __x86_64
 void redirect_pointers_in_x86()
 {
-    // TODO: Allocate contiguous area, with size of 0x40023800 - 0x40000000
+    // TODO: Allocate contiguous area, with size of 0x40023800 -
+    // 0x40000000
     gpioa = malloc(sizeof(struct gpio));
     gpiob = malloc(sizeof(struct gpio));
     gpioc = malloc(sizeof(struct gpio));
@@ -455,7 +511,8 @@ void redirect_pointers_in_x86()
 }
 #endif
 
-int main() {
+int main()
+{
 #ifdef __x86_64
     printf("Redirecting pointers\n");
     redirect_pointers_in_x86();
@@ -479,29 +536,44 @@ int main() {
     printf("Program starts\n");
 #endif
     // Program starts
-    //blink_led(10);
+    // blink_led(10);
 
-    display_string("123456");
-    //display_string("888888");
+    // display_string("123456");
+    /*return 0;
+    //delay_hack_1_second();
+    // const char *str = int_to_str(12345);
+    while (1)
+    {
+        delay(100);
+        int cnt = tim2->cnt;
+        const char *str = int_to_str(cnt);
+        display_string(str);
+    }*/
+    /*const char *str = int_to_str(5);
+
+    display_string(str);*/
+    // display_string("123456");
+    // display_string("888888");
 
     // Use following lines for manually scanning pixels through
-    //ram_buf[4] = FULL_32;
-    //ram_buf[4] |= 0xf << 12;
-    //SET_NTH_BIT(ram_buf[4], 13);
+    // ram_buf[4] = FULL_32;
+    // ram_buf[4] |= 0xf << 12;
+    // SET_NTH_BIT(ram_buf[4], 13);
 
     commit_lcd_ram_buf();
-    //delay(400);
-    delay_hack();
-    //while(1);
+    // delay(400);
+    delay_hack_1_second();
+    // while(1);
+    // return 0;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100000; i++) {
         zero_ram_buf();
         const char *str = int_to_str(i);
         display_string(str);
         /* write_full_buf(); */
         commit_lcd_ram_buf();
         /* delay(4000); */
-        delay_hack();
+        delay_hack_10_us();
 
         /* show_empty_screen(); */
         /* if (ram_buf_idx >= RAM_BUFS) */
@@ -510,7 +582,8 @@ int main() {
     /* delay(4000); */
     /* blink_led(5); */
 #ifndef __x86_64
-    while(1);
+    while (1)
+        ;
 #endif
 
     return 0;

@@ -43,7 +43,7 @@ install:
 					-c "verify_image $(PROJ_NAME).hex" \
 					-c "reset run" \
 					-c "shutdown"
-	#openocd -f board/stm32ldiscovery.cfg
+	openocd -f board/stm32ldiscovery.cfg
 
 #clean:
 #	@rm -f *.elf

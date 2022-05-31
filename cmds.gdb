@@ -1,8 +1,10 @@
 target remote localhost:3333
 monitor reset halt
 load
+symbol-file main.elf
 b main
 layout asm
+continue
 
 display/x $r0
 display/x $r1
@@ -20,7 +22,7 @@ display/x $r7
 #break *0x8000190
 
 # strlen
-break *0x80001d4
+#break *0x80001d4
 
 # main
 #break *0x8000302
