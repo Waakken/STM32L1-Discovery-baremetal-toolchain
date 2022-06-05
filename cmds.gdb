@@ -54,6 +54,7 @@ display/x *0x40002400
 display/x *0x40002404
 # LCD SR:
 display/x *0x40002408
-
+# TIM2 CNT:
+display/x *0x40000024
 # Write:
 #set {int}0x40000010 = 0
