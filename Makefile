@@ -11,6 +11,7 @@ STARTUP		= startup_stm32l1xx_md.s
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float -O -g
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -Wunused -Werror  -O2
 CFLAGS    	= -Wunused -Werror -O1 -g
+#CFLAGS    	= -Wunused -Werror -O0 -g
 ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS)
 
 ## OPENOCD VARIABLES  ##

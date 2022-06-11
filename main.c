@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #endif
 
+#define MSI_CLOCK_DEFAULT_FREQ 2097000
+#define LOOPS_PER_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
+
 struct gpio *gpioa = (struct gpio *)GPIOA;
 struct gpio *gpiob = (struct gpio *)GPIOB;
 struct gpio *gpioc = (struct gpio *)GPIOC;
@@ -281,7 +284,8 @@ void init_clocks_for_lcd()
     rcc->apb1enr |= (1 << 9);
 }
 
-void init_gpio_clocks() {
+void init_gpio_clocks()
+{
     // GPIO A-H EN
     rcc->ahbenr |= 0x1f;
 }
@@ -383,7 +387,7 @@ void start_timer(unsigned prescaler)
 
       how to achieve: 1 tick = 1ms (1M ns)?
 
-      476 * x = 476
+      476 * x = 1000000
             x = 1000000 / 476
             x = 2100
     */
@@ -427,13 +431,18 @@ void delay(unsigned ms)
         ;
 }
 
-int cpu_busy_loop_1_second()
+void cpu_busy_loop_1_second()
 {
-    // 2 instructions per loop:
-    //   subs, bneq
-    //   nop maybe ignored by cpu
-    for (int i = 0; i < 800000; i++)
-        asm("nop");
+    // 5 instructions, 6 cycles per loop:
+    //   nop * 3
+    //   subs
+    //   bne.n (2 cycles)
+    for (int i = 0; i < LOOPS_PER_BUSY_LOOP; i++) {
+         asm("nop");
+         asm("nop");
+         asm("nop");
+    }
+    return;
 }
 
 int cpu_busy_loop_10_us()
@@ -498,7 +507,7 @@ const char *int_to_str(int num)
     for (int i = 0; i < 6; i++)
         digit_str[i] = 0;
 
-    //int digits = count_digits(num);
+    // int digits = count_digits(num);
 
     int pow_10 = 10;
 
@@ -548,12 +557,13 @@ void redirect_pointers_in_x86()
 }
 #endif
 
-void display_int_on_lcd(unsigned long number)
+void display_int_on_lcd_for_one_second(unsigned long number)
 {
     const char *str = int_to_str(number);
     zero_ram_buf();
     write_string_to_ram_buf(str);
     commit_lcd_ram_buf();
+    cpu_busy_loop_1_second();
 }
 
 int main()
@@ -580,16 +590,13 @@ int main()
 #ifdef __x86_64
     printf("Program starts\n");
 #endif
-    // Some tests strings for LCD display
-    // write_string_to_ram_buf("123456");
-    // write_string_to_ram_buf("888888");
-
     // Use following lines for manually scanning pixels through
     // ram_buf[4] = FULL_32;
     // ram_buf[4] |= 0xf << 12;
     // SET_NTH_BIT(ram_buf[4], 13);
 
     float single_tick_dur_ns = (1.0 / 2097000.0) * 1000000000.0;
+    // TODO: This doesn't compile without optimization
     unsigned single_tick_dur_ns_u = single_tick_dur_ns;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
 #ifdef __x86_64
@@ -597,25 +604,22 @@ int main()
            single_tick_dur_ns, single_tick_dur_ns_u, prescaler_1ms_per_tick);
 #endif
 
-    display_int_on_lcd(single_tick_dur_ns_u);
-    cpu_busy_loop_1_second();
-    display_int_on_lcd(prescaler_1ms_per_tick);
-    cpu_busy_loop_1_second();
+    display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
+    display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
+    display_int_on_lcd_for_one_second(LOOPS_PER_BUSY_LOOP);
 
 #ifdef __x86_64
-        return 0;
+    return 0;
 #endif
 
     start_timer(prescaler_1ms_per_tick);
-    while(1) {
+    while (1) {
         int cnt = tim2->cnt;
         zero_ram_buf();
-        /* const char *str = int_to_str(i); */
         const char *str = int_to_str(cnt);
         write_string_to_ram_buf(str);
         commit_lcd_ram_buf();
-        /* cpu_busy_loop_1_second(); */
-        cpu_busy_loop_10_us();
+        cpu_busy_loop_1_second();
     }
 #ifndef __x86_64
     while (1)
