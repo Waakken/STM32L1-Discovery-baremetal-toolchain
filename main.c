@@ -7,7 +7,10 @@
 #endif
 
 #define MSI_CLOCK_DEFAULT_FREQ 2097000
-#define LOOPS_PER_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
+// With -O1:
+#define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
+// With -O0:
+//#define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 15)
 
 struct gpio *gpioa = (struct gpio *)GPIOA;
 struct gpio *gpiob = (struct gpio *)GPIOB;
@@ -96,6 +99,7 @@ void display_pixel(struct lcd_pixel);
 void write_string_to_ram_buf(const char *str);
 struct lcd_pixel map_pixel_alphabet(int digit, int alphabet);
 void display_digit_in_location(int digit, int location);
+const char *int_to_str(int num);
 
 // definitions
 void display_pixel(struct lcd_pixel pix)
@@ -133,6 +137,12 @@ int my_strlen(const char *str)
     for (; str[i]; i++)
         ;
     return i;
+}
+
+void write_int_to_ram_buf(int num)
+{
+    const char *str = int_to_str(num);
+    write_string_to_ram_buf(str);
 }
 
 void write_string_to_ram_buf(const char *str)
@@ -254,11 +264,6 @@ void init_lcd()
 
     // enable
     lcd->cr |= 1;
-
-    asm("nop");
-    asm("nop");
-    asm("nop");
-    asm("nop");
 }
 
 void init_clocks_for_lcd()
@@ -437,18 +442,30 @@ void cpu_busy_loop_1_second()
     //   nop * 3
     //   subs
     //   bne.n (2 cycles)
-    for (int i = 0; i < LOOPS_PER_BUSY_LOOP; i++) {
-         asm("nop");
-         asm("nop");
-         asm("nop");
+    for (int i = 0; i < LOOPS_FOR_1_SEC_BUSY_LOOP; i++) {
+        asm("nop");
+        asm("nop");
+        asm("nop");
     }
     return;
 }
 
-int cpu_busy_loop_10_us()
+int cpu_busy_loop_1_ms()
 {
-    for (int i = 0; i < 8000; i++)
+    for (int i = 0; i < LOOPS_FOR_1_SEC_BUSY_LOOP / 1000; i++) {
         asm("nop");
+        asm("nop");
+        asm("nop");
+    }
+}
+
+int cpu_busy_loop_10_loops()
+{
+    for (int i = 0; i < 10; i++) {
+        asm("nop");
+        asm("nop");
+        asm("nop");
+    }
 }
 
 void blink_led(int count)
@@ -501,6 +518,7 @@ int count_digits(int num)
 #endif
     return i;
 }
+
 const char *int_to_str(int num)
 {
     // Reinitialize digit_str buffer
@@ -574,16 +592,11 @@ int main()
     printf("Initializing\n");
 #endif
     // Initialization
-    asm("nop");
-    asm("nop");
     init_gpio_clocks();
 
     set_gpio_moder_to_af();
     set_gpio_af_modes();
     init_clocks_for_lcd();
-    asm("nop");
-    asm("nop");
-    asm("nop");
     init_lcd();
     zero_ram_buf();
 
@@ -595,18 +608,16 @@ int main()
     // ram_buf[4] |= 0xf << 12;
     // SET_NTH_BIT(ram_buf[4], 13);
 
-    float single_tick_dur_ns = (1.0 / 2097000.0) * 1000000000.0;
-    // TODO: This doesn't compile without optimization
-    unsigned single_tick_dur_ns_u = single_tick_dur_ns;
+    unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
 #ifdef __x86_64
-    printf("Single tick float: %f, int: %u, prescaler_1ms_per_tick: %u\n",
-           single_tick_dur_ns, single_tick_dur_ns_u, prescaler_1ms_per_tick);
+    printf("Single tick: %u, prescaler_1ms_per_tick: %u\n",
+           single_tick_dur_ns_u, prescaler_1ms_per_tick);
 #endif
 
     display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
     display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
-    display_int_on_lcd_for_one_second(LOOPS_PER_BUSY_LOOP);
+    display_int_on_lcd_for_one_second(LOOPS_FOR_1_SEC_BUSY_LOOP);
 
 #ifdef __x86_64
     return 0;
@@ -614,12 +625,11 @@ int main()
 
     start_timer(prescaler_1ms_per_tick);
     while (1) {
-        int cnt = tim2->cnt;
         zero_ram_buf();
-        const char *str = int_to_str(cnt);
-        write_string_to_ram_buf(str);
+        write_int_to_ram_buf(tim2->cnt);
         commit_lcd_ram_buf();
-        cpu_busy_loop_1_second();
+        /* cpu_busy_loop_1_second(); */
+        cpu_busy_loop_1_ms();
     }
 #ifndef __x86_64
     while (1)

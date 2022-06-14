@@ -53,4 +53,7 @@ install:
 debug:
 	gdb --command=cmds.gdb main.hex
 
+format:
+	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux }" -i main.c
+
 .PHONY: all program
