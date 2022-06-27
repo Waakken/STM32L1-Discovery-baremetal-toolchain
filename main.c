@@ -450,7 +450,7 @@ void cpu_busy_loop_1_second()
     return;
 }
 
-int cpu_busy_loop_1_ms()
+void cpu_busy_loop_1_ms()
 {
     for (int i = 0; i < LOOPS_FOR_1_SEC_BUSY_LOOP / 1000; i++) {
         asm("nop");
@@ -459,7 +459,7 @@ int cpu_busy_loop_1_ms()
     }
 }
 
-int cpu_busy_loop_10_loops()
+void cpu_busy_loop_10_loops()
 {
     for (int i = 0; i < 10; i++) {
         asm("nop");
@@ -556,16 +556,16 @@ void redirect_pointers_in_x86()
 #ifdef __x86_64
     // TODO: Allocate contiguous area, with size of 0x40023800 -
     // 0x40000000
-    gpioa = malloc(sizeof(struct gpio));
-    gpiob = malloc(sizeof(struct gpio));
-    gpioc = malloc(sizeof(struct gpio));
-    gpiod = malloc(sizeof(struct gpio));
-    gpioe = malloc(sizeof(struct gpio));
-    rcc = malloc(sizeof(struct rcc));
-    tim2 = malloc(sizeof(struct tim2));
-    rtc = malloc(sizeof(struct rtc));
-    lcd = malloc(sizeof(struct lcd));
-    pwr = malloc(sizeof(struct pwr));
+    gpioa = (struct gpio *)malloc(sizeof(struct gpio));
+    gpiob = (struct gpio *)malloc(sizeof(struct gpio));
+    gpioc = (struct gpio *)malloc(sizeof(struct gpio));
+    gpiod = (struct gpio *)malloc(sizeof(struct gpio));
+    gpioe = (struct gpio *)malloc(sizeof(struct gpio));
+    rcc = (struct rcc *)malloc(sizeof(struct rcc));
+    tim2 = (struct tim2 *)malloc(sizeof(struct tim2));
+    rtc = (struct rtc *)malloc(sizeof(struct rtc));
+    lcd = (struct lcd *)malloc(sizeof(struct lcd));
+    pwr = (struct pwr *)malloc(sizeof(struct pwr));
 #else
     return;
 #endif
@@ -629,8 +629,8 @@ int main()
         zero_ram_buf();
         write_int_to_ram_buf(tim2->cnt);
         commit_lcd_ram_buf();
-        /* cpu_busy_loop_1_second(); */
-        cpu_busy_loop_1_ms();
+        cpu_busy_loop_1_second();
+        /* cpu_busy_loop_1_ms(); */
     }
 #ifndef __x86_64
     while (1)
