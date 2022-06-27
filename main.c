@@ -2,6 +2,7 @@
 #include "reg_defs.h"
 
 #ifdef __x86_64
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #endif
@@ -100,6 +101,7 @@ void write_string_to_ram_buf(const char *str);
 struct lcd_pixel map_pixel_alphabet(int digit, int alphabet);
 void display_digit_in_location(int digit, int location);
 const char *int_to_str(int num);
+void printf_x86(const char *fmt, ...);
 
 // definitions
 void display_pixel(struct lcd_pixel pix)
@@ -147,9 +149,7 @@ void write_int_to_ram_buf(int num)
 
 void write_string_to_ram_buf(const char *str)
 {
-#ifdef __x86_64
-    printf("Displaying: %s\n", str);
-#endif
+    printf_x86("Displaying: %s\n", str);
     for (int i = 0; i < my_strlen(str); i++) {
         int digit_idx = str[i] - '0';
         display_digit_in_location(digit_idx, i);
@@ -484,10 +484,8 @@ void display_digit_in_location(int digit, int location)
 {
     int digit_idx = digit;
     const char *str_for_digit = digit_pixel_mappings[digit_idx];
-#ifdef __x86_64
-    printf("%s digit: %u, location: %u, str_for_digit: %s\n", __func__, digit,
-           location, str_for_digit);
-#endif
+    printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__,
+               digit, location, str_for_digit);
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
@@ -505,17 +503,14 @@ int count_digits(int num)
     int pow_10 = 10;
     int i = 1;
     for (; i < 7; i++) {
-#ifdef __x86_64
-        printf("%s num: %u loop: %u pow 10: %u\n", __func__, num, i, pow_10);
-#endif
+        printf_x86("%s num: %u loop: %u pow 10: %u\n", __func__, num, i,
+                   pow_10);
         int div = num / pow_10;
         if (!div)
             break;
         pow_10 *= 10;
     }
-#ifdef __x86_64
-    printf("%s num: %u has %u digits\n", __func__, num, i);
-#endif
+    printf_x86("%s num: %u has %u digits\n", __func__, num, i);
     return i;
 }
 
@@ -544,22 +539,21 @@ const char *int_to_str(int num)
         cur_digit = mod / (pow_10 / 10);
         digit_str[digit_str_index] = cur_digit + '0';
         // digit_str[0] = num + '0';
-#ifdef __x86_64
         int digits = 0;
-        printf("%s digits: %u num: %u loop: %u pow 10: %u, cur "
-               "digit: %u, mod: %u, "
-               "str: %s\n",
-               __func__, digits, num, i, pow_10, cur_digit, mod, digit_str);
-#endif
+        printf_x86("%s digits: %u num: %u loop: %u pow 10: %u, cur "
+                   "digit: %u, mod: %u, "
+                   "str: %s\n",
+                   __func__, digits, num, i, pow_10, cur_digit, mod, digit_str);
         pow_10 *= 10;
         digit_str_index--;
     }
     return digit_str;
 }
 
-#ifdef __x86_64
 void redirect_pointers_in_x86()
 {
+    printf_x86("Redirecting pointers\n");
+#ifdef __x86_64
     // TODO: Allocate contiguous area, with size of 0x40023800 -
     // 0x40000000
     gpioa = malloc(sizeof(struct gpio));
@@ -572,8 +566,10 @@ void redirect_pointers_in_x86()
     rtc = malloc(sizeof(struct rtc));
     lcd = malloc(sizeof(struct lcd));
     pwr = malloc(sizeof(struct pwr));
-}
+#else
+    return;
 #endif
+}
 
 void display_int_on_lcd_for_one_second(unsigned long number)
 {
@@ -584,13 +580,22 @@ void display_int_on_lcd_for_one_second(unsigned long number)
     cpu_busy_loop_1_second();
 }
 
-int main()
+void printf_x86(const char *fmt, ...)
 {
 #ifdef __x86_64
-    printf("Redirecting pointers\n");
-    redirect_pointers_in_x86();
-    printf("Initializing\n");
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+#else
+    return;
 #endif
+}
+
+int main()
+{
+    redirect_pointers_in_x86();
+    printf_x86("Initializing\n");
     // Initialization
     init_gpio_clocks();
 
@@ -600,9 +605,7 @@ int main()
     init_lcd();
     zero_ram_buf();
 
-#ifdef __x86_64
-    printf("Program starts\n");
-#endif
+    printf_x86("Program starts\n");
     // Use following lines for manually scanning pixels through
     // ram_buf[4] = FULL_32;
     // ram_buf[4] |= 0xf << 12;
@@ -610,10 +613,8 @@ int main()
 
     unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
-#ifdef __x86_64
-    printf("Single tick: %u, prescaler_1ms_per_tick: %u\n",
-           single_tick_dur_ns_u, prescaler_1ms_per_tick);
-#endif
+    printf_x86("Single tick: %u, prescaler_1ms_per_tick: %u\n",
+               single_tick_dur_ns_u, prescaler_1ms_per_tick);
 
     display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
     display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
