@@ -265,7 +265,8 @@ int count_digits(int num)
 void display_int_on_lcd_for_one_second(unsigned long number)
 {
     const char *str = int_to_str(number);
-    zero_ram_buf();
+    Lcd lcd;
+    lcd.zero_ram_buf();
     write_string_to_ram_buf(str);
     commit_lcd_ram_buf();
     cpu_busy_loop_1_second();
@@ -273,6 +274,7 @@ void display_int_on_lcd_for_one_second(unsigned long number)
 
 int main()
 {
+    Lcd lcd;
     redirect_pointers_in_x86();
     printf_x86("Initializing\n");
     // Initialization
@@ -282,7 +284,7 @@ int main()
     set_gpio_af_modes();
     init_clocks_for_lcd();
     init_lcd();
-    zero_ram_buf();
+    lcd.zero_ram_buf();
 
     printf_x86("Program starts\n");
     // Use following lines for manually scanning pixels through
@@ -305,7 +307,7 @@ int main()
 
     start_timer(prescaler_1ms_per_tick);
     while (1) {
-        zero_ram_buf();
+        lcd.zero_ram_buf();
         write_int_to_ram_buf(get_tim2()->cnt);
         commit_lcd_ram_buf();
         cpu_busy_loop_1_second();

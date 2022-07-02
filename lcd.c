@@ -122,7 +122,7 @@ void write_full_buf()
         ram_buf_idx = 0;
 }
 
-void zero_ram_buf()
+void Lcd::zero_ram_buf()
 {
     for (int i = 0; i < RAM_BUFS; i++) {
         ram_buf[i] = 0;
