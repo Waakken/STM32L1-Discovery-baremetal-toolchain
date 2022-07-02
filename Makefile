@@ -1,6 +1,6 @@
 ## USER DEFINED VARIABLES ##
 PROJ_NAME = main
-SRC = $(wildcard *.c)
+SRC = $(wildcard *.cpp)
 
 
 
