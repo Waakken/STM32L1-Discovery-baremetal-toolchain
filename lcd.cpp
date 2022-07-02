@@ -4,7 +4,6 @@
 #include "x86.hpp"
 
 // TODO: Use definition instead of magic number
-char digit_str[6] = {0, 0, 0, 0, 0, 0};
 
 /*
 Digits and characters are expressed as letters describing segments: A-Q.
@@ -59,15 +58,10 @@ const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
     /* 8 */ {"ABCDGMFE"},
     /* 9 */ {"AFDGMCB"}};
 
-// CPU side copy of the LCD pixel buffer. Always copied fully to LCD memory
-REG ram_buf[RAM_BUFS];
-int ram_pixel_idx = 0;
-int ram_buf_idx = 0;
-
-void display_digit_in_location(int digit, int location)
+void Lcd::display_digit_in_location(int digit, int location)
 {
-    int digit_idx = digit;
-    const char *str_for_digit = digit_pixel_mappings[digit_idx];
+    // int digit_idx = digit;
+    const char *str_for_digit = digit_pixel_mappings[digit];
     printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__,
                digit, location, str_for_digit);
     struct lcd_pixel pix;
@@ -78,7 +72,7 @@ void display_digit_in_location(int digit, int location)
     }
 }
 
-struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
+struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int alphabet)
 {
     /*
      * args:
@@ -96,14 +90,14 @@ struct lcd_pixel map_pixel_alphabet(int digit, int alphabet)
     }
 }
 
-void fill_ram_buf()
+void Lcd::fill_ram_buf()
 {
     for (int i = 0; i < RAM_BUFS; i++) {
         ram_buf[i] = 0xffffffff;
     }
 }
 
-void write_next_pixel()
+void Lcd::write_next_pixel()
 {
     ram_buf[ram_buf_idx] |= (1 << ram_pixel_idx);
     ram_pixel_idx++;
@@ -114,7 +108,7 @@ void write_next_pixel()
     }
 }
 
-void write_full_buf()
+void Lcd::write_full_buf()
 {
     ram_buf[ram_buf_idx] = 0xffffffff;
     ram_buf_idx++;
@@ -129,7 +123,7 @@ void Lcd::zero_ram_buf()
     }
 }
 
-void commit_lcd_ram_buf()
+void Lcd::commit_lcd_ram_buf()
 {
     // TODO: Need to wait and see that it's safe to write
 
@@ -141,31 +135,7 @@ void commit_lcd_ram_buf()
     get_lcd()->sr |= (1 << 2);
 }
 
-void show_empty_screen()
-{
-    for (int i = 0; i < RAM_BUFS; i++) {
-        get_lcd()->ram[i] = 0;
-    }
-
-    // Update display request
-    get_lcd()->sr |= (1 << 2);
-
-    /* while(1); */
-}
-
-void zero_lcd_bits()
-{
-    for (int i = 0; i < RAM_BUFS; i++) {
-        get_lcd()->ram[i] = 0;
-    }
-
-    // Update display request
-    get_lcd()->sr |= (1 << 2);
-
-    /* while(1); */
-}
-
-void display_pixel(struct lcd_pixel pix)
+void Lcd::display_pixel(struct lcd_pixel pix)
 {
     int ram_buf_idx = pix.com * 2;
     int segment = pix.seg;
@@ -176,7 +146,7 @@ void display_pixel(struct lcd_pixel pix)
     SET_NTH_BIT(ram_buf[ram_buf_idx], segment);
 }
 
-void init_lcd()
+void Lcd::init_lcd()
 {
     // bias 1/2
     // lcd->cr |=  (1 << 5);
@@ -217,7 +187,7 @@ void init_lcd()
     get_lcd()->cr |= 1;
 }
 
-int my_strlen(const char *str)
+int Lcd::my_strlen(const char *str)
 {
     int i = 0;
     for (; str[i]; i++)
@@ -225,13 +195,13 @@ int my_strlen(const char *str)
     return i;
 }
 
-void write_int_to_ram_buf(int num)
+void Lcd::write_int_to_ram_buf(int num)
 {
     const char *str = int_to_str(num);
     write_string_to_ram_buf(str);
 }
 
-void write_string_to_ram_buf(const char *str)
+void Lcd::write_string_to_ram_buf(const char *str)
 {
     printf_x86("Displaying: %s\n", str);
     for (int i = 0; i < my_strlen(str); i++) {
@@ -240,7 +210,7 @@ void write_string_to_ram_buf(const char *str)
     }
 }
 
-const char *int_to_str(int num)
+const char *Lcd::int_to_str(int num)
 {
     // Reinitialize digit_str buffer
     for (int i = 0; i < 6; i++)

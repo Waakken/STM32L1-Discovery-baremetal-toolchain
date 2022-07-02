@@ -263,11 +263,11 @@ int count_digits(int num)
 
 void display_int_on_lcd_for_one_second(unsigned long number)
 {
-    const char *str = int_to_str(number);
     Lcd lcd;
+    const char *str = lcd.int_to_str(number);
     lcd.zero_ram_buf();
-    write_string_to_ram_buf(str);
-    commit_lcd_ram_buf();
+    lcd.write_string_to_ram_buf(str);
+    lcd.commit_lcd_ram_buf();
     cpu_busy_loop_1_second();
 }
 
@@ -282,7 +282,7 @@ int main()
     set_gpio_moder_to_af();
     set_gpio_af_modes();
     init_clocks_for_lcd();
-    init_lcd();
+    lcd.init_lcd();
     lcd.zero_ram_buf();
 
     printf_x86("Program starts\n");
@@ -307,8 +307,8 @@ int main()
     start_timer(prescaler_1ms_per_tick);
     while (1) {
         lcd.zero_ram_buf();
-        write_int_to_ram_buf(get_tim2()->cnt);
-        commit_lcd_ram_buf();
+        lcd.write_int_to_ram_buf(get_tim2()->cnt);
+        lcd.commit_lcd_ram_buf();
         cpu_busy_loop_1_second();
         /* cpu_busy_loop_1_ms(); */
     }
