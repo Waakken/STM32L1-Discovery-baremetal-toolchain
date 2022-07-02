@@ -34,8 +34,8 @@ struct lcd_pixel pixels_for_digit_low[6][8] =
 struct lcd_pixel pixels_for_digit_high[6][9] =
     {
         //            I        J        K        L        M        N        O        P        Q
-        /* 0 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  1}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
-        /* 1 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  7}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
+        /* 0 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  1}, {2, 13}, {2, 13}, {2,  0}, {2, 13}},
+        /* 1 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  7}, {2, 13}, {2, 13}, {2,  2}, {2, 13}},
         /* 2 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  9}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
         /* 3 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 11}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
         /* 4 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0, 13}, {2, 13}, {2, 13}, {2, 13}, {2, 13}},
@@ -58,9 +58,43 @@ const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
     /* 8 */ {"ABCDGMFE"},
     /* 9 */ {"AFDGMCB"}};
 
+// Alphabet pixel mappings
+#define ALPHABETS 26
+const char alphabet_pixel_mappings[ALPHABETS][PIXELS_PER_DIGIT] = {
+    /* a */ {"ABCEFGM"},
+    /* b */ {"CDEFGM"},
+    /* c */ {"AFED"},
+    /* d */ {"BCDEGM"},
+    /* e */ {"AFEDGM"},
+    /* f */ {"AFEGM"},
+    /* g */ {"AFDGMCE"},
+    /* h */ {"BCEFGM"},
+    /* i */ {"FE"},
+    /* j */ {"BCDE"},
+
+    /* k */ {"EFGKN"},
+    /* l */ {"FED"},
+    /* m */ {"EFHKBC"},
+    /* n */ {"EFHNBC"},
+    /* o */ {"ABCDEF"},
+    /* p */ {"EFABGM"},
+    /* q */ {"ABCFGM"},
+    /* r */ {"EFABGMN"},
+    /* s */ {"ACDFGM"},
+    /* t */ {"AJP"},
+
+    /* u */ {"FEDBC"},
+    /* v */ {"HNBC"},
+    /* w */ {"EFQJNCB"},
+    /* x */ {"HKQN"},
+    /* y */ {"HKP"},
+    /* z */ {"AKQD"}};
+
 void Lcd::display_digit_in_location(int digit, int location)
 {
-    // int digit_idx = digit;
+    if (digit > 9)
+        return;
+
     const char *str_for_digit = digit_pixel_mappings[digit];
     printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__,
                digit, location, str_for_digit);
@@ -72,7 +106,27 @@ void Lcd::display_digit_in_location(int digit, int location)
     }
 }
 
-struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int alphabet)
+void Lcd::display_alphabet_in_location(int alphabet, int location)
+{
+    if (alphabet > 'z' || alphabet < 'a') {
+        printf_x86("%s error: bad args, alphabet: %u, location: %d", __func__,
+                   alphabet, location);
+        return;
+    }
+    alphabet -= 'a';
+
+    const char *str_for_digit = alphabet_pixel_mappings[alphabet];
+    printf_x86("%s alphabet: %u, location: %u, str_for_digit: %s\n", __func__,
+               alphabet, location, str_for_digit);
+    struct lcd_pixel pix;
+    for (int j = 0; j < my_strlen(str_for_digit); j++) {
+        char segment = str_for_digit[j];
+        pix = map_pixel_alphabet(location, segment);
+        display_pixel(pix);
+    }
+}
+
+struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int segment_alphabet)
 {
     /*
      * args:
@@ -81,13 +135,34 @@ struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int alphabet)
      */
 
     // TODO: Add support for checking arguments
-    if (alphabet > 'H') {
-        int segment = alphabet - 'I';
+    if (segment_alphabet > 'H') {
+        int segment = segment_alphabet - 'I';
         return pixels_for_digit_high[digit][segment];
     } else {
-        int segment = alphabet - 'A';
+        int segment = segment_alphabet - 'A';
         return pixels_for_digit_low[digit][segment];
     }
+}
+
+void Lcd::set_ram_buf_bit(int ram_buf_idx, int bit_idx)
+{
+    // ram_buf[4] = FULL_32;
+    // ram_buf[4] |= 0xf << 12;
+    if (ram_buf_idx > RAM_BUFS)
+        return;
+
+    SET_NTH_BIT(ram_buf[ram_buf_idx], bit_idx);
+}
+
+void Lcd::set_ram_buf(int ram_buf_idx, REG val)
+{
+    // ram_buf[4] = FULL_32;
+    // ram_buf[4] |= 0xf << 12;
+    // SET_NTH_BIT(ram_buf[4], 13);
+    if (ram_buf_idx > RAM_BUFS)
+        return;
+
+    ram_buf[ram_buf_idx] = val;
 }
 
 void Lcd::fill_ram_buf()
@@ -116,14 +191,14 @@ void Lcd::write_full_buf()
         ram_buf_idx = 0;
 }
 
-void Lcd::zero_ram_buf()
+void Lcd::reset()
 {
     for (int i = 0; i < RAM_BUFS; i++) {
         ram_buf[i] = 0;
     }
 }
 
-void Lcd::commit_lcd_ram_buf()
+void Lcd::commit()
 {
     // TODO: Need to wait and see that it's safe to write
 

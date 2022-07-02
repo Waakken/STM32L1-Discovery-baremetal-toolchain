@@ -12,11 +12,16 @@ struct lcd_pixel {
 class Lcd {
 public:
     const char *int_to_str(int num);
-    void zero_ram_buf(void);
+    void reset(void);
     void write_string_to_ram_buf(const char *str);
-    void commit_lcd_ram_buf();
+    void commit();
     void init_lcd();
     void write_int_to_ram_buf(int num);
+
+    // TODO: Make private after testing ready
+    void display_alphabet_in_location(int alphabet, int location);
+    void set_ram_buf(int ram_buf_idx, REG val);
+    void set_ram_buf_bit(int ram_buf_idx, int bit_idx);
 
 private:
     void display_pixel(struct lcd_pixel pix);

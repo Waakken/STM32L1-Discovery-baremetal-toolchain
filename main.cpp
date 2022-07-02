@@ -265,10 +265,18 @@ void display_int_on_lcd_for_one_second(unsigned long number)
 {
     Lcd lcd;
     const char *str = lcd.int_to_str(number);
-    lcd.zero_ram_buf();
+    lcd.reset();
     lcd.write_string_to_ram_buf(str);
-    lcd.commit_lcd_ram_buf();
+    lcd.commit();
     cpu_busy_loop_1_second();
+}
+
+void arm_inf_loop()
+{
+#ifdef __aarch64
+    while (1)
+        ;
+#endif
 }
 
 int main()
@@ -283,13 +291,32 @@ int main()
     set_gpio_af_modes();
     init_clocks_for_lcd();
     lcd.init_lcd();
-    lcd.zero_ram_buf();
+    lcd.reset();
 
     printf_x86("Program starts\n");
     // Use following lines for manually scanning pixels through
     // ram_buf[4] = FULL_32;
     // ram_buf[4] |= 0xf << 12;
     // SET_NTH_BIT(ram_buf[4], 13);
+    // lcd.set_ram_buf(4, FULL_32);
+    lcd.set_ram_buf(4, 0xf << 4);
+    // lcd.set_ram_buf_bit(4, 2);
+    lcd.commit();
+
+    arm_inf_loop();
+
+#ifdef __x86_64
+    return 0;
+#endif
+
+    for (int i = 'a'; i < 'z'; i++) {
+        lcd.display_alphabet_in_location(i, 1);
+        lcd.commit();
+        cpu_busy_loop_1_second();
+        lcd.reset();
+    }
+
+    arm_inf_loop();
 
     unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
@@ -300,22 +327,19 @@ int main()
     display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
     display_int_on_lcd_for_one_second(LOOPS_FOR_1_SEC_BUSY_LOOP);
 
-#ifdef __x86_64
-    return 0;
-#endif
-
     start_timer(prescaler_1ms_per_tick);
     while (1) {
-        lcd.zero_ram_buf();
+        lcd.reset();
         lcd.write_int_to_ram_buf(get_tim2()->cnt);
-        lcd.commit_lcd_ram_buf();
+        lcd.commit();
         cpu_busy_loop_1_second();
         /* cpu_busy_loop_1_ms(); */
     }
-#ifndef __x86_64
-    while (1)
-        ;
-#endif
+    arm_inf_loop();
+    // #ifndef __x86_64
+    //     while (1)
+    //         ;
+    // #endif
 
     return 0;
 }
