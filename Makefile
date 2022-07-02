@@ -1,6 +1,8 @@
 ## USER DEFINED VARIABLES ##
 PROJ_NAME = main
-SRC = main.c
+SRC = $(wildcard *.c)
+
+
 
 
 ## COMPILER VARIABLES ##
@@ -54,6 +56,6 @@ debug:
 	gdb --command=cmds.gdb main.hex
 
 format:
-	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux }" -i main.c
+	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux }" -i $(SRC)
 
 .PHONY: all program
