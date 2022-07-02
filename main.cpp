@@ -1,7 +1,6 @@
-/* #include "reg_addr.h" */
-#include "lcd.h"
-#include "reg_access.h"
-#include "reg_defs.h"
+#include "lcd.hpp"
+#include "reg_access.hpp"
+#include "reg_defs.hpp"
 
 #ifdef __x86_64
 #include <stdarg.h>

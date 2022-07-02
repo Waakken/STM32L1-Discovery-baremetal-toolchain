@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reg_defs.h"
+#include "reg_defs.hpp"
 
 struct lcd_pixel {
     int com;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reg_addr.h"
+#include "reg_addr.hpp"
 struct rcc *get_rcc(void);
 struct gpio *get_gpioa(void);
 struct gpio *get_gpiob(void);

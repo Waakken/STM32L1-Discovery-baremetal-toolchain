@@ -1,7 +1,7 @@
-#include "lcd.h"
-#include "reg_access.h"
-#include "reg_defs.h"
-#include "x86.h"
+#include "lcd.hpp"
+#include "reg_access.hpp"
+#include "reg_defs.hpp"
+#include "x86.hpp"
 
 // TODO: Use definition instead of magic number
 char digit_str[6] = {0, 0, 0, 0, 0, 0};

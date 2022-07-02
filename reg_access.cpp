@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #endif
 
-#include "reg_defs.h"
+#include "reg_defs.hpp"
 
 #define TIM2 0x40000000
 #define LCD 0x40002400
