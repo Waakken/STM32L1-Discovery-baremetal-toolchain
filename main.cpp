@@ -273,7 +273,7 @@ void display_int_on_lcd_for_one_second(unsigned long number)
 
 void arm_inf_loop()
 {
-#ifdef __aarch64
+#ifdef __arm__
     while (1)
         ;
 #endif
@@ -295,19 +295,45 @@ int main()
 
     printf_x86("Program starts\n");
     // Use following lines for manually scanning pixels through
-    // ram_buf[4] = FULL_32;
-    // ram_buf[4] |= 0xf << 12;
-    // SET_NTH_BIT(ram_buf[4], 13);
     // lcd.set_ram_buf(4, FULL_32);
-    lcd.set_ram_buf(4, 0xf << 4);
-    // lcd.set_ram_buf_bit(4, 2);
-    lcd.commit();
+    // int bit_shift = 0;
+    // while(1) {
+    //     lcd.reset();
+    //     lcd.write_int_to_ram_buf(bit_shift);
+    //     lcd.commit();
+    //     cpu_busy_loop_1_second();
+    //     cpu_busy_loop_1_second();
 
-    arm_inf_loop();
+    //     lcd.reset();
+    //     lcd.set_ram_buf(4, 0xf << bit_shift);
+    //     lcd.commit();
+    //     cpu_busy_loop_1_second();
+    //     cpu_busy_loop_1_second();
+    //     bit_shift += 4;
+    //     if (bit_shift > 28)
+    //         bit_shift = 0;
+    // }
+    // lcd.set_ram_buf(4, 0xf << 24);
+
+    // lcd.set_ram_buf_bit(4, 27);
+
+    // lcd.commit();
+    // arm_inf_loop();
+
+    /*
+0-1 -> 0
+2-3 -> 1
+4-5 -> 2
+6-7 -> 3
+    */
 
 #ifdef __x86_64
     return 0;
 #endif
+
+    // lcd.display_alphabet_in_location('x', 1);
+    // lcd.commit();
+    // arm_inf_loop();
 
     for (int i = 'a'; i < 'z'; i++) {
         lcd.display_alphabet_in_location(i, 1);
@@ -315,7 +341,6 @@ int main()
         cpu_busy_loop_1_second();
         lcd.reset();
     }
-
     arm_inf_loop();
 
     unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
