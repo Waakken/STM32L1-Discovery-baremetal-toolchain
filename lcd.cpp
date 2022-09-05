@@ -20,7 +20,7 @@ E     C
 // LCD pixel mappings
 // 2, 13 is the 'default': not yet implemented.
 // clang-format off
-struct lcd_pixel pixels_for_digit_low[6][8] =
+constexpr struct lcd_pixel pixels_for_digit_low[6][8] =
     {
         //            A        B        C        D        E        F        G        H
         /* 0 */ {{1, 40}, {0, 40}, {1,  1}, {1,  0}, {0,  0}, {1, 41}, {0, 41}, {2, 13}},
@@ -31,7 +31,7 @@ struct lcd_pixel pixels_for_digit_low[6][8] =
         /* 5 */ {{1, 17}, {0, 17}, {1, 15}, {1, 14}, {0, 14}, {1, 16}, {0, 16}, {2, 13}}
     };
 
-struct lcd_pixel pixels_for_digit_high[6][9] =
+constexpr struct lcd_pixel pixels_for_digit_high[6][9] =
     {
         //            I        J        K        L        M        N        O        P        Q
         /* 0 */ {{2, 13}, {2, 13}, {2, 13}, {2, 13}, {0,  1}, {2, 13}, {2, 13}, {2,  0}, {2, 13}},
@@ -46,7 +46,7 @@ struct lcd_pixel pixels_for_digit_high[6][9] =
 // Digit pixel mappings
 #define DIGITS 10
 #define PIXELS_PER_DIGIT 15
-const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
+constexpr const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
     /* 0 */ {"ABCDEF"},
     /* 1 */ {"BC"},
     /* 2 */ {"ABDEMG"},
@@ -59,8 +59,9 @@ const char digit_pixel_mappings[DIGITS][PIXELS_PER_DIGIT] = {
     /* 9 */ {"AFDGMCB"}};
 
 // Alphabet pixel mappings
-#define ALPHABETS 26
-const char alphabet_pixel_mappings[ALPHABETS][PIXELS_PER_DIGIT] = {
+constexpr int ALPHABETS{26};
+
+constexpr char alphabet_pixel_mappings[ALPHABETS][PIXELS_PER_DIGIT] = {
     /* a */ {"ABCEFGM"},
     /* b */ {"CDEFGM"},
     /* c */ {"AFED"},
