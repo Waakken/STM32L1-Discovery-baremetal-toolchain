@@ -17,6 +17,11 @@
 #define GPIOE 0x40021000
 #define RCC 0x40023800
 
+#define SRAM 0x20000000
+#define SRAM_SIZE 0x7FFF
+#define FLASH 0x08000000
+#define FLASH_SIZE 0x3FFFF
+
 struct gpio *gpioa = (struct gpio *)GPIOA;
 struct gpio *gpiob = (struct gpio *)GPIOB;
 struct gpio *gpioc = (struct gpio *)GPIOC;
@@ -27,6 +32,8 @@ struct tim2 *tim2 = (struct tim2 *)TIM2;
 struct rtc *rtc = (struct rtc *)RTC;
 struct lcd *lcd = (struct lcd *)LCD;
 struct pwr *pwr = (struct pwr *)PWR;
+REG *sram = (REG *)SRAM;
+REG *flash = (REG *)FLASH;
 
 struct rcc *get_rcc(void) { return rcc; }
 struct gpio *get_gpioa(void) { return gpioa; }
@@ -38,6 +45,10 @@ struct pwr *get_pwr(void) { return pwr; }
 struct tim2 *get_tim2(void) { return tim2; }
 struct rtc *get_rtc(void) { return rtc; }
 struct lcd *get_lcd(void) { return lcd; }
+REG *get_sram(void) { return sram; }
+REG *get_flash(void) { return flash; }
+REG get_sram_size(void) { return SRAM_SIZE; }
+REG get_flash_size(void) { return FLASH_SIZE; }
 
 void redirect_pointers_in_x86()
 {
@@ -55,6 +66,8 @@ void redirect_pointers_in_x86()
     rtc = (struct rtc *)malloc(sizeof(struct rtc));
     lcd = (struct lcd *)malloc(sizeof(struct lcd));
     pwr = (struct pwr *)malloc(sizeof(struct pwr));
+    sram = (REG *)malloc(SRAM_SIZE);
+    flash = (REG *)malloc(FLASH_SIZE);
 #else
     return;
 #endif

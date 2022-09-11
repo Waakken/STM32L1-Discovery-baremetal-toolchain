@@ -105,6 +105,68 @@ void arm_inf_loop()
 #endif
 }
 
+void test_sram()
+{
+    Lcd lcd;
+    REG *sram_ptr = get_sram();
+    REG sram_size = get_sram_size();
+
+    for (REG i = 40; i < sram_size / 4; i++) {
+        // for (REG i = 0; i < 10; i++) {
+        sram_ptr[i] = 0x12345678;
+        if (sram_ptr[i] != 0x12345678) {
+            while (1)
+                ;
+        }
+        // const char *str = lcd.int_to_str(i);
+        lcd.reset();
+        lcd.write_int_to_ram_buf(i);
+        lcd.commit();
+        // cpu_busy_loop_1_second();
+    }
+}
+
+void demo_alphabets()
+{
+    // lcd.display_alphabet_in_location('x', 1);
+    // lcd.commit();
+    // arm_inf_loop();
+
+    Lcd lcd;
+    for (int i = 'a'; i < 'z'; i++) {
+        lcd.display_alphabet_in_location(i, 1);
+        lcd.commit();
+        cpu_busy_loop_1_second();
+        lcd.reset();
+    }
+    arm_inf_loop();
+}
+
+void demo_timer()
+{
+    Lcd lcd;
+    Clocks clocks;
+
+    unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
+    unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
+    printf_x86("Single tick: %u, prescaler_1ms_per_tick: %u\n",
+               single_tick_dur_ns_u, prescaler_1ms_per_tick);
+
+    display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
+    display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
+    display_int_on_lcd_for_one_second(LOOPS_FOR_1_SEC_BUSY_LOOP);
+
+    clocks.start_timer(prescaler_1ms_per_tick);
+    while (1) {
+        lcd.reset();
+        lcd.write_int_to_ram_buf(get_tim2()->cnt);
+        lcd.commit();
+        // cpu_busy_loop_1_second();
+        cpu_busy_loop_1_ms();
+    }
+    arm_inf_loop();
+}
+
 int main()
 {
     Lcd lcd;
@@ -123,6 +185,14 @@ int main()
     lcd.reset();
 
     printf_x86("Program starts\n");
+#ifdef __x86_64
+    return 0;
+#endif
+
+    // test_sram();
+    // demo_alphabets();
+    // demo_timer();
+
     // Use following lines for manually scanning pixels through
     // lcd.set_ram_buf(4, FULL_32);
     // int bit_shift = 0;
@@ -156,40 +226,6 @@ int main()
 6-7 -> 3
     */
 
-#ifdef __x86_64
-    return 0;
-#endif
-
-    // lcd.display_alphabet_in_location('x', 1);
-    // lcd.commit();
-    // arm_inf_loop();
-
-    for (int i = 'a'; i < 'z'; i++) {
-        lcd.display_alphabet_in_location(i, 1);
-        lcd.commit();
-        cpu_busy_loop_1_second();
-        lcd.reset();
-    }
-    arm_inf_loop();
-
-    unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
-    unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
-    printf_x86("Single tick: %u, prescaler_1ms_per_tick: %u\n",
-               single_tick_dur_ns_u, prescaler_1ms_per_tick);
-
-    display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
-    display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);
-    display_int_on_lcd_for_one_second(LOOPS_FOR_1_SEC_BUSY_LOOP);
-
-    clocks.start_timer(prescaler_1ms_per_tick);
-    while (1) {
-        lcd.reset();
-        lcd.write_int_to_ram_buf(get_tim2()->cnt);
-        lcd.commit();
-        cpu_busy_loop_1_second();
-        /* cpu_busy_loop_1_ms(); */
-    }
-    arm_inf_loop();
     // #ifndef __x86_64
     //     while (1)
     //         ;

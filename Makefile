@@ -13,7 +13,8 @@ OBJCOPY		= $(CC_PREFIX)objcopy
 STARTUP		= startup_stm32l1xx_md.s
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float -O -g
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -Wunused -Werror  -O2
-CFLAGS    	= -Wunused -Werror -O1 -g
+CFLAGS    	= -Wunused -Werror -O2 -g
+#CFLAGS    	= -Wunused -Werror -O1 -g
 #CFLAGS    	= -Wunused -Werror -O0 -g
 ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions -Wall
 
@@ -49,9 +50,9 @@ install:
 					-c "shutdown"
 	openocd -f board/stm32ldiscovery.cfg
 
-#clean:
-#	@rm -f *.elf
-#	@rm -f *.hex
+clean:
+	@rm -f *.elf
+	@rm -f *.hex
 
 debug:
 	gdb --command=cmds.gdb main.hex
