@@ -2,7 +2,11 @@ target remote localhost:3333
 monitor reset halt
 load
 symbol-file main.elf
-b main
+break main
+#break Lcd::write_int_to_ram_buf(int)
+#break Lcd::write_string_to_ram_buf
+#break Lcd::display_digit_in_location
+#break Lcd::display_pixel
 layout asm
 continue
 
@@ -11,8 +15,10 @@ display/x $r1
 display/x $r2
 display/x $r3
 display/x $r4
+display/x $r5
+display/x $r6
 display/x $r7
-#display $r8
+display/x $r8
 
 #display 0x20000300
 #display/20 0x20000300
@@ -43,18 +49,18 @@ display/x $r7
 # RTC WPR:
 #x 0x40002824
 # RCC CSR:
-display/x *0x40023834
+#display/x *0x40023834
 # PWR CR:
-display/x *0x40007000
+#display/x *0x40007000
 # RCC APB1ENR:
-display/x *0x40023824
+#display/x *0x40023824
 # LCD CR:
-display/x *0x40002400
+#display/x *0x40002400
 # LCD FCR:
-display/x *0x40002404
+#display/x *0x40002404
 # LCD SR:
-display/x *0x40002408
+#display/x *0x40002408
 # TIM2 CNT:
-display/x *0x40000024
+#display/x *0x40000024
 # Write:
 #set {int}0x40000010 = 0
