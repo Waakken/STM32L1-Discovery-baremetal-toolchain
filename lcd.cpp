@@ -263,7 +263,7 @@ void Lcd::init_lcd()
     get_lcd()->cr |= 1;
 }
 
-int Lcd::my_strlen(const char *str)
+int Lcd::my_strlen(const volatile char *str)
 {
     int i = 0;
     for (; str[i]; i++)

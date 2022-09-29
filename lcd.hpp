@@ -28,7 +28,7 @@ private:
     void fill_ram_buf();
     void write_next_pixel();
     void write_full_buf();
-    int my_strlen(const char *str);
+    int my_strlen(const volatile char *str);
     struct lcd_pixel map_pixel_alphabet(int digit, int alphabet);
     void display_digit_in_location(int digit, int location);
 
