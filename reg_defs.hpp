@@ -90,3 +90,22 @@ struct pwr {
     REG cr;
     REG csr;
 };
+
+struct dma_general {
+    REG isr;
+    REG ifcr;
+};
+
+struct dma_ch {
+    REG ccr;
+    REG cndtr;
+    REG cpar;
+    REG cmar;
+};
+
+constexpr unsigned int DMA_CHANNEL_COUNT{7};
+
+struct dma_controller {
+    struct dma_general gen;
+    struct dma_ch ch[DMA_CHANNEL_COUNT];
+};

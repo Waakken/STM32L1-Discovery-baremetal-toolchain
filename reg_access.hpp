@@ -12,6 +12,8 @@ struct pwr *get_pwr(void);
 struct tim2 *get_tim2(void);
 struct rtc *get_rtc(void);
 struct lcd *get_lcd(void);
+struct dma_controller *get_dma1(void);
+struct dma_controller *get_dma2(void);
 
 REG *get_sram(void);
 REG *get_flash(void);

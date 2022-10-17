@@ -32,6 +32,15 @@ void Clocks::init_gpio_clocks()
     get_rcc()->ahbenr |= 0x1f;
 }
 
+void Clocks::init_dma_clocks()
+{
+    // DMA 1
+    get_rcc()->ahbenr |= (1 << 24);
+
+    // DMA 2
+    get_rcc()->ahbenr |= (1 << 25);
+}
+
 void Clocks::start_timer(unsigned prescaler)
 {
     /* enable tim2 */

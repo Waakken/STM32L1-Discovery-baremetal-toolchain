@@ -1,4 +1,5 @@
 #include "clocks.hpp"
+#include "dma.hpp"
 #include "gpio.hpp"
 #include "lcd.hpp"
 #include "reg_access.hpp"
@@ -172,6 +173,7 @@ int main()
     Lcd lcd;
     GPIO gpio;
     Clocks clocks;
+    Dma dma;
 
     redirect_pointers_in_x86();
     printf_x86("Initializing\n");
@@ -181,6 +183,7 @@ int main()
     gpio.set_gpio_moder_to_af();
     gpio.set_gpio_af_modes();
     clocks.init_clocks_for_lcd();
+    clocks.init_dma_clocks();
     lcd.init_lcd();
     lcd.reset();
 

@@ -55,7 +55,7 @@ clean:
 	@rm -f *.hex
 
 debug:
-	gdb --command=cmds.gdb main.hex
+	gdb main.hex
 
 format:
 	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux }" -i $(SRC)

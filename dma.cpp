@@ -1,0 +1,22 @@
+#include "dma.hpp"
+#include "reg_access.hpp"
+#include "reg_defs.hpp"
+
+void Dma::reset_channel(unsigned int ch_index)
+{
+    if (ch_index > DMA_CHANNEL_COUNT)
+        return;
+
+    dma_reg->ch[ch_index].ccr = 0;
+}
+
+void Dma::transfer_data(unsigned int ch_index, REG src, REG dst,
+                        unsigned int bytes)
+{
+
+    dma_reg->ch[ch_index].cpar = src;
+    dma_reg->ch[ch_index].cmar = dst;
+    dma_reg->ch[ch_index].cndtr = bytes;
+    // enable
+    dma_reg->ch[ch_index].ccr |= 1;
+}

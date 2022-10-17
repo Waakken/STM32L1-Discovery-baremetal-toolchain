@@ -4,4 +4,5 @@ public:
     void delay(unsigned ms);
     void start_timer(unsigned prescaler);
     void init_gpio_clocks();
+    void init_dma_clocks();
 };
