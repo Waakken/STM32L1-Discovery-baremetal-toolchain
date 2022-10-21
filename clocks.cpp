@@ -8,19 +8,14 @@ void Clocks::init_clocks_for_lcd()
     // Power interface clock enable
     get_rcc()->apb1enr |= (1 << 28);
 
-    // pwr->cr Looks OK!
     // Disable backup write protection
     get_pwr()->cr |= (1 << 8);
 
-    // rcc->csr Looks OK!
     // enable LSI
-    get_rcc()->csr |= 1;
-
     // use LCI as LCD clock
-    get_rcc()->csr |= (1 << 17);
-
     // enable RTC clock
-    get_rcc()->csr |= (1 << 22);
+    REG reg = 0b00000000'01000010'00000000'00000001;
+    get_rcc()->csr |= reg;
 
     // enable LCD clock
     get_rcc()->apb1enr |= (1 << 9);
@@ -29,7 +24,8 @@ void Clocks::init_clocks_for_lcd()
 void Clocks::init_gpio_clocks()
 {
     // GPIO A-H EN
-    get_rcc()->ahbenr |= 0x1f;
+    REG reg = 0b00011111;
+    get_rcc()->ahbenr |= reg;
 }
 
 void Clocks::init_dma_clocks()

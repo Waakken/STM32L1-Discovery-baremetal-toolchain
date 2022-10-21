@@ -170,12 +170,12 @@ void demo_timer()
 
 int main()
 {
+    redirect_pointers_in_x86();
     Lcd lcd;
     GPIO gpio;
     Clocks clocks;
     Dma dma;
 
-    redirect_pointers_in_x86();
     printf_x86("Initializing\n");
     // Initialization
     clocks.init_gpio_clocks();
@@ -194,7 +194,7 @@ int main()
 
     // test_sram();
     // demo_alphabets();
-    // demo_timer();
+    demo_timer();
 
     // Use following lines for manually scanning pixels through
     // lcd.set_ram_buf(4, FULL_32);
