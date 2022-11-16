@@ -15,6 +15,5 @@ public:
 private:
     struct rcc *rcc_reg;
     struct tim2 *tim2_reg;
-    struct pwr *pwr_reg; // (void) { return pwr; }
-    // struct rcc *get_rcc(void) { return rcc; }
+    struct pwr *pwr_reg;
 };

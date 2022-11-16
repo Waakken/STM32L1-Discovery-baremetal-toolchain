@@ -168,6 +168,17 @@ void demo_timer()
     arm_inf_loop();
 }
 
+void demo_dma()
+{
+    Dma dma;
+    dma.reset_channel(0);
+    REG *src = (REG *)0x20001000;
+    REG *dst = (REG *)0x20002000;
+    *src = 0x12345678;
+    *dst = 0;
+    dma.transfer_data(0, (REG)src, (REG)dst, 4);
+}
+
 int main()
 {
     redirect_pointers_in_x86();
@@ -194,7 +205,8 @@ int main()
 
     // test_sram();
     // demo_alphabets();
-    demo_timer();
+    // demo_timer();
+    demo_dma();
 
     // Use following lines for manually scanning pixels through
     // lcd.set_ram_buf(4, FULL_32);
