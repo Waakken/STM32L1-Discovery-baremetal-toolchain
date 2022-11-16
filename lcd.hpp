@@ -1,6 +1,7 @@
 #pragma once
 
 #include "reg_defs.hpp"
+#include "reg_access.hpp"
 
 struct lcd_pixel {
     int com;
@@ -11,6 +12,8 @@ struct lcd_pixel {
 
 class Lcd {
 public:
+    Lcd() : lcd_reg(get_lcd()){};
+
     const char *int_to_str(int num);
     void reset(void);
     void write_string_to_ram_buf(const char *str);
@@ -37,4 +40,6 @@ private:
     REG ram_buf[RAM_BUFS];
     int ram_pixel_idx = 0;
     int ram_buf_idx = 0;
+
+    struct lcd *lcd_reg;
 };

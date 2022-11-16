@@ -1,6 +1,4 @@
 #include "dma.hpp"
-#include "reg_access.hpp"
-#include "reg_defs.hpp"
 
 void Dma::reset_channel(unsigned int ch_index)
 {

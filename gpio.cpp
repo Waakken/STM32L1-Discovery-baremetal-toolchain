@@ -1,6 +1,4 @@
 #include "gpio.hpp"
-#include "reg_access.hpp"
-#include "reg_defs.hpp"
 #include "x86.hpp"
 
 #define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))

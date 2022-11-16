@@ -2,6 +2,7 @@
 
 #include "reg_addr.hpp"
 #include "reg_defs.hpp"
+
 struct rcc *get_rcc(void);
 struct gpio *get_gpioa(void);
 struct gpio *get_gpiob(void);

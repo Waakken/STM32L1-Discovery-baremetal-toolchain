@@ -1,6 +1,4 @@
 #include "lcd.hpp"
-#include "reg_access.hpp"
-#include "reg_defs.hpp"
 #include "x86.hpp"
 
 // TODO: Use definition instead of magic number
@@ -204,11 +202,11 @@ void Lcd::commit()
     // TODO: Need to wait and see that it's safe to write
 
     for (int i = 0; i < RAM_BUFS; i++) {
-        get_lcd()->ram[i] = ram_buf[i];
+        lcd_reg->ram[i] = ram_buf[i];
     }
 
     // Update display request
-    get_lcd()->sr |= (1 << 2);
+    lcd_reg->sr |= (1 << 2);
 }
 
 void Lcd::display_pixel(struct lcd_pixel pix)
@@ -228,7 +226,7 @@ void Lcd::init_lcd()
     // lcd->cr |=  (1 << 5);
 
     // bias 1/3
-    get_lcd()->cr |= (1 << 6);
+    lcd_reg->cr |= (1 << 6);
 
     // bias 1/4
     // = 0
@@ -240,27 +238,27 @@ void Lcd::init_lcd()
     // lcd->cr |= (1 << 3);
 
     // duty 1/4
-    get_lcd()->cr |= (3 << 2);
+    lcd_reg->cr |= (3 << 2);
 
     // duty 1/8
     // lcd->cr |= (1 << 4);
 
     // contrast 111
     /* lcd->fcr |=  (3 << 10); */
-    get_lcd()->fcr |= (7 << 10);
+    lcd_reg->fcr |= (7 << 10);
 
     // pulse width
     /* lcd->fcr |= (7 << 4); */
-    get_lcd()->fcr |= (3 << 4);
+    lcd_reg->fcr |= (3 << 4);
 
     // disable mux
-    get_lcd()->cr &= ~(1 << 7);
+    lcd_reg->cr &= ~(1 << 7);
 
     // use internal voltage source
-    get_lcd()->cr &= ~1;
+    lcd_reg->cr &= ~1;
 
     // enable
-    get_lcd()->cr |= 1;
+    lcd_reg->cr |= 1;
 }
 
 int Lcd::my_strlen(const volatile char *str)
