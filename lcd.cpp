@@ -284,13 +284,41 @@ void Lcd::write_string_to_ram_buf(const char *str)
     }
 }
 
+const char *Lcd::hex_to_str(int num)
+{
+    // TODO: letters a-f not implemented yet
+    for (int i = 0; i < 6; i++)
+        digit_str[i] = '0';
+
+    printf_x86("%s: num: %u (0x%x)\n", __func__, num, num);
+
+    // Displaying only 6 most significant digits
+    num >>= 8;
+    unsigned mask = 0;
+    for (int i = 5; i >= 0; i--) {
+        mask = (0xF);
+        char byte = num & mask;
+        if (byte < 10)
+            byte += '0';
+        else
+            byte = byte - 10 + 'a';
+
+        printf_x86("%s, i: %u, byte: %3u (0x%x, %c), num: %8u (0x%08x)\n",
+                   __func__, i, byte, byte, byte, num, num, mask);
+        digit_str[i] = byte;
+        num >>= 4;
+    }
+    return digit_str;
+}
+
 const char *Lcd::int_to_str(int num)
 {
+    // TODO: This class is returning pointer to private member of Lcd, for no
+    // reason
+
     // Reinitialize digit_str buffer
     for (int i = 0; i < 6; i++)
-        digit_str[i] = 0;
-
-    // int digits = count_digits(num);
+        digit_str[i] = '0';
 
     int pow_10 = 10;
 
@@ -301,19 +329,15 @@ const char *Lcd::int_to_str(int num)
     pow_10 *= 10;
 
     int digit_str_index = 4;
-    for (int i = 1; i < 6; i++)
-    // for (int i = 0; i < digits; i++)
-    {
+    for (int i = 1; i < 6; i++) {
         // TODO: Add support for first digit
         int mod = num % pow_10;
         cur_digit = mod / (pow_10 / 10);
         digit_str[digit_str_index] = cur_digit + '0';
-        // digit_str[0] = num + '0';
-        int digits = 0;
-        printf_x86("%s digits: %u num: %u loop: %u pow 10: %u, cur "
+        printf_x86("%s num: %u (hex: 0x%x) loop: %u pow 10: %u, cur "
                    "digit: %u, mod: %u, "
                    "str: %s\n",
-                   __func__, digits, num, i, pow_10, cur_digit, mod, digit_str);
+                   __func__, num, num, i, pow_10, cur_digit, mod, digit_str);
         pow_10 *= 10;
         digit_str_index--;
     }

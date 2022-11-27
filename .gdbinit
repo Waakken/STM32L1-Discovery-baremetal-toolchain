@@ -3,8 +3,8 @@ monitor reset halt
 load
 symbol-file main.elf
 #break main
-#break demo_dma
-break Dma::transfer_data
+break demo_dma
+#break Dma::transfer_data
 #break Lcd::write_int_to_ram_buf(int)
 #break Lcd::write_string_to_ram_buf
 #break Lcd::display_digit_in_location

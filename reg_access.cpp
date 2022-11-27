@@ -41,6 +41,10 @@ struct dma_controller *dma2 = (struct dma_controller *)DMA2;
 REG *sram = (REG *)SRAM;
 REG *flash = (REG *)FLASH;
 
+/*
+  TODO: These functions should be put under RegisterAccessor -class,
+  from which those Lcd, Gpio, etc classes are derived
+*/
 struct rcc *get_rcc(void) { return rcc; }
 struct gpio *get_gpioa(void) { return gpioa; }
 struct gpio *get_gpiob(void) { return gpiob; }

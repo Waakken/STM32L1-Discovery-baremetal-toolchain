@@ -15,6 +15,7 @@ public:
     Lcd() : lcd_reg(get_lcd()){};
 
     const char *int_to_str(int num);
+    const char *hex_to_str(int num);
     void reset(void);
     void write_string_to_ram_buf(const char *str);
     void commit();

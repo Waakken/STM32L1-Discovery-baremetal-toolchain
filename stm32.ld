@@ -29,8 +29,10 @@ ENTRY(Reset_Handler)
  * NOTE: The reserved heap and stack will be added to the bss column of the
  * binutils size command.
  */
-_heap_size = 0;    /* required amount of heap  */
-_stack_size = 0;   /* required amount of stack */
+
+/* TODO: Reserve memory areas here */
+_heap_size = 1000;    /* required amount of heap  */
+_stack_size = 1000;   /* required amount of stack */
 
 /*
  * The stack starts at the end of RAM and grows downwards. Full-descending

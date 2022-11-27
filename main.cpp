@@ -12,6 +12,14 @@
 #include <stdlib.h>
 #endif
 
+static_assert(sizeof(int) == 4, "int assumed to be 4 bytes");
+static_assert(sizeof(unsigned) == 4, "unsigned assumed to be 4 bytes");
+#ifdef __x86_64
+static_assert(sizeof(REG) == 8, "REG assumed to be 8 bytes in x86");
+#else
+static_assert(sizeof(REG) == 4, "REG assumed to be 4 bytes in arm");
+#endif
+
 #define MSI_CLOCK_DEFAULT_FREQ 2097000
 // With -O1:
 #define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
@@ -19,6 +27,8 @@
 //#define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 15)
 
 #define FULL_32 (0xffffffff)
+
+char bss_buffer[0x1000];
 
 // forward declarations
 void blink_led(int count);
@@ -88,13 +98,25 @@ int count_digits(int num)
     return i;
 }
 
-void display_int_on_lcd_for_one_second(unsigned long number)
+// void display_int_on_lcd_for_one_second(unsigned long number)
+void display_int_on_lcd_for_one_second(int number)
 {
     Lcd lcd;
     const char *str = lcd.int_to_str(number);
     lcd.reset();
     lcd.write_string_to_ram_buf(str);
     lcd.commit();
+    cpu_busy_loop_1_second();
+}
+
+void display_hex_on_lcd_for_two_seconds(int number)
+{
+    Lcd lcd;
+    const char *str = lcd.hex_to_str(number);
+    lcd.reset();
+    lcd.write_string_to_ram_buf(str);
+    lcd.commit();
+    cpu_busy_loop_1_second();
     cpu_busy_loop_1_second();
 }
 
@@ -171,12 +193,37 @@ void demo_timer()
 void demo_dma()
 {
     Dma dma;
+
+    // TODO: Heap not reserved yet
+    // Heap
+    // REG *src = (REG *)0x20001000;
+    // REG *dst = (REG *)0x20002000;
+    // *src = 0x12345678;
+    // *dst = 0;
+
+    // Stack
+    printf_x86("DMA test - stack\n");
+    REG src;
+    REG dst;
+    src = 0x12345678;
+    dst = 0;
+
     dma.reset_channel(0);
-    REG *src = (REG *)0x20001000;
-    REG *dst = (REG *)0x20002000;
-    *src = 0x12345678;
-    *dst = 0;
-    dma.transfer_data(0, (REG)src, (REG)dst, 4);
+    dma.transfer_data(0, (REG)&src, (REG)&dst, 4);
+    display_hex_on_lcd_for_two_seconds((REG)(&dst));
+    display_hex_on_lcd_for_two_seconds((REG)(dst));
+
+    // BSS
+    printf_x86("DMA test - BSS\n");
+    REG *bss_src = (REG *)(bss_buffer);
+    REG *bss_dst = (REG *)(bss_buffer + 0x200);
+    *bss_src = 0x12345678;
+    *bss_dst = 0;
+
+    dma.reset_channel(0);
+    dma.transfer_data(0, (REG)bss_src, (REG)bss_dst, 4);
+    display_hex_on_lcd_for_two_seconds((REG)(bss_dst));
+    display_hex_on_lcd_for_two_seconds((REG)(*bss_dst));
 }
 
 int main()
@@ -199,10 +246,6 @@ int main()
     lcd.reset();
 
     printf_x86("Program starts\n");
-#ifdef __x86_64
-    return 0;
-#endif
-
     // test_sram();
     // demo_alphabets();
     // demo_timer();
