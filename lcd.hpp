@@ -14,12 +14,13 @@ class Lcd {
 public:
     Lcd() : lcd_reg(get_lcd()){};
 
-    const char *int_to_str(int num);
-    const char *hex_to_str(int num);
-    void reset(void);
-    void write_string_to_ram_buf(const char *str);
-    void commit();
-    void init_lcd();
+    void int_to_str(int num);
+    void hex_to_str(int num);
+    void reset_ram_buf(void);
+    // TODO: Does this need to be public? It seems to complicate the interface
+    void write_string_to_ram_buf(void);
+    void commit() const;
+    void init_lcd() const;
     void write_int_to_ram_buf(int num);
 
     // TODO: Make private after testing ready
@@ -28,15 +29,17 @@ public:
     void set_ram_buf_bit(int ram_buf_idx, int bit_idx);
 
 private:
+    void clear_digit_str();
     void display_pixel(struct lcd_pixel pix);
     void fill_ram_buf();
     void write_next_pixel();
     void write_full_buf();
-    int my_strlen(const volatile char *str);
-    struct lcd_pixel map_pixel_alphabet(int digit, int alphabet);
+    int my_strlen(const volatile char *str) const;
+    struct lcd_pixel map_pixel_alphabet(int digit, int alphabet) const;
     void display_digit_in_location(int digit, int location);
 
-    char digit_str[6] = {0, 0, 0, 0, 0, 0};
+    static constexpr unsigned digit_str_len{6};
+    char digit_str[digit_str_len] = {0, 0, 0, 0, 0, 0};
     // CPU side copy of the LCD pixel buffer. Always copied fully to LCD memory
     REG ram_buf[RAM_BUFS];
     int ram_pixel_idx = 0;

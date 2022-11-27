@@ -102,9 +102,9 @@ int count_digits(int num)
 void display_int_on_lcd_for_one_second(int number)
 {
     Lcd lcd;
-    const char *str = lcd.int_to_str(number);
-    lcd.reset();
-    lcd.write_string_to_ram_buf(str);
+    lcd.int_to_str(number);
+    lcd.reset_ram_buf();
+    lcd.write_string_to_ram_buf();
     lcd.commit();
     cpu_busy_loop_1_second();
 }
@@ -112,9 +112,9 @@ void display_int_on_lcd_for_one_second(int number)
 void display_hex_on_lcd_for_two_seconds(int number)
 {
     Lcd lcd;
-    const char *str = lcd.hex_to_str(number);
-    lcd.reset();
-    lcd.write_string_to_ram_buf(str);
+    lcd.hex_to_str(number);
+    lcd.reset_ram_buf();
+    lcd.write_string_to_ram_buf();
     lcd.commit();
     cpu_busy_loop_1_second();
     cpu_busy_loop_1_second();
@@ -142,7 +142,7 @@ void test_sram()
                 ;
         }
         // const char *str = lcd.int_to_str(i);
-        lcd.reset();
+        lcd.reset_ram_buf();
         lcd.write_int_to_ram_buf(i);
         lcd.commit();
         // cpu_busy_loop_1_second();
@@ -160,7 +160,7 @@ void demo_alphabets()
         lcd.display_alphabet_in_location(i, 1);
         lcd.commit();
         cpu_busy_loop_1_second();
-        lcd.reset();
+        lcd.reset_ram_buf();
     }
     arm_inf_loop();
 }
@@ -181,13 +181,12 @@ void demo_timer()
 
     clocks.start_timer(prescaler_1ms_per_tick);
     while (1) {
-        lcd.reset();
+        lcd.reset_ram_buf();
         lcd.write_int_to_ram_buf(get_tim2()->cnt);
         lcd.commit();
         // cpu_busy_loop_1_second();
         cpu_busy_loop_1_ms();
     }
-    arm_inf_loop();
 }
 
 void demo_dma()
@@ -243,7 +242,7 @@ int main()
     clocks.init_clocks_for_lcd();
     clocks.init_dma_clocks();
     lcd.init_lcd();
-    lcd.reset();
+    lcd.reset_ram_buf();
 
     printf_x86("Program starts\n");
     // test_sram();
@@ -255,13 +254,13 @@ int main()
     // lcd.set_ram_buf(4, FULL_32);
     // int bit_shift = 0;
     // while(1) {
-    //     lcd.reset();
+    //     lcd.reset_ram_buf();
     //     lcd.write_int_to_ram_buf(bit_shift);
     //     lcd.commit();
     //     cpu_busy_loop_1_second();
     //     cpu_busy_loop_1_second();
 
-    //     lcd.reset();
+    //     lcd.reset_ram_buf();
     //     lcd.set_ram_buf(4, 0xf << bit_shift);
     //     lcd.commit();
     //     cpu_busy_loop_1_second();

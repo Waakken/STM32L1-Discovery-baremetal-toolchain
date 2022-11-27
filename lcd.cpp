@@ -1,8 +1,6 @@
 #include "lcd.hpp"
 #include "x86.hpp"
 
-// TODO: Use definition instead of magic number
-
 /*
 Digits and characters are expressed as letters describing segments: A-Q.
 
@@ -125,7 +123,7 @@ void Lcd::display_alphabet_in_location(int alphabet, int location)
     }
 }
 
-struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int segment_alphabet)
+struct lcd_pixel Lcd::map_pixel_alphabet(int digit, int segment_alphabet) const
 {
     /*
      * args:
@@ -190,14 +188,14 @@ void Lcd::write_full_buf()
         ram_buf_idx = 0;
 }
 
-void Lcd::reset()
+void Lcd::reset_ram_buf()
 {
     for (int i = 0; i < RAM_BUFS; i++) {
         ram_buf[i] = 0;
     }
 }
 
-void Lcd::commit()
+void Lcd::commit() const
 {
     // TODO: Need to wait and see that it's safe to write
 
@@ -220,7 +218,7 @@ void Lcd::display_pixel(struct lcd_pixel pix)
     SET_NTH_BIT(ram_buf[ram_buf_idx], segment);
 }
 
-void Lcd::init_lcd()
+void Lcd::init_lcd() const
 {
     // bias 1/2
     // lcd->cr |=  (1 << 5);
@@ -261,7 +259,7 @@ void Lcd::init_lcd()
     lcd_reg->cr |= 1;
 }
 
-int Lcd::my_strlen(const volatile char *str)
+int Lcd::my_strlen(const volatile char *str) const
 {
     int i = 0;
     for (; str[i]; i++)
@@ -271,24 +269,29 @@ int Lcd::my_strlen(const volatile char *str)
 
 void Lcd::write_int_to_ram_buf(int num)
 {
-    const char *str = int_to_str(num);
-    write_string_to_ram_buf(str);
+    int_to_str(num);
+    write_string_to_ram_buf();
 }
 
-void Lcd::write_string_to_ram_buf(const char *str)
+void Lcd::write_string_to_ram_buf(void)
 {
-    printf_x86("Displaying: %s\n", str);
-    for (int i = 0; i < my_strlen(str); i++) {
-        int digit_idx = str[i] - '0';
+    printf_x86("Displaying: %s\n", digit_str);
+    for (unsigned i = 0; i < digit_str_len; i++) {
+        int digit_idx = digit_str[i] - '0';
         display_digit_in_location(digit_idx, i);
     }
 }
 
-const char *Lcd::hex_to_str(int num)
+void Lcd::clear_digit_str()
+{
+    for (unsigned i = 0; i < digit_str_len; i++)
+        digit_str[i] = '0';
+}
+
+void Lcd::hex_to_str(int num)
 {
     // TODO: letters a-f not implemented yet
-    for (int i = 0; i < 6; i++)
-        digit_str[i] = '0';
+    clear_digit_str();
 
     printf_x86("%s: num: %u (0x%x)\n", __func__, num, num);
 
@@ -308,18 +311,11 @@ const char *Lcd::hex_to_str(int num)
         digit_str[i] = byte;
         num >>= 4;
     }
-    return digit_str;
 }
 
-const char *Lcd::int_to_str(int num)
+void Lcd::int_to_str(int num)
 {
-    // TODO: This class is returning pointer to private member of Lcd, for no
-    // reason
-
-    // Reinitialize digit_str buffer
-    for (int i = 0; i < 6; i++)
-        digit_str[i] = '0';
-
+    clear_digit_str();
     int pow_10 = 10;
 
     // First digit:
@@ -330,7 +326,6 @@ const char *Lcd::int_to_str(int num)
 
     int digit_str_index = 4;
     for (int i = 1; i < 6; i++) {
-        // TODO: Add support for first digit
         int mod = num % pow_10;
         cur_digit = mod / (pow_10 / 10);
         digit_str[digit_str_index] = cur_digit + '0';
@@ -341,5 +336,4 @@ const char *Lcd::int_to_str(int num)
         pow_10 *= 10;
         digit_str_index--;
     }
-    return digit_str;
 }
