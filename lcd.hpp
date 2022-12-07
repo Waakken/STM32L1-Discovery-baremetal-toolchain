@@ -1,7 +1,7 @@
 #pragma once
 
 #include "reg_defs.hpp"
-#include "reg_access.hpp"
+#include "reg_accessor.hpp"
 
 struct lcd_pixel {
     int com;
@@ -10,7 +10,7 @@ struct lcd_pixel {
 
 #define SET_NTH_BIT(reg, nth) ((reg) |= (1 << (nth)))
 
-class Lcd {
+class Lcd : private RegAccessor {
 public:
     Lcd() : lcd_reg(get_lcd()){};
 

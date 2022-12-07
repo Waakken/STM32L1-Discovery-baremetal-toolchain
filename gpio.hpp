@@ -1,6 +1,6 @@
-#include "reg_access.hpp"
+#include "reg_accessor.hpp"
 
-class GPIO {
+class GPIO : private RegAccessor {
 public:
     GPIO() :
         gpioa_reg(get_gpioa()),

@@ -198,10 +198,13 @@ void demo_timer()
     clocks.start_timer(prescaler_1ms_per_tick);
     while (1) {
         lcd.reset_ram_buf();
-        lcd.write_int_to_ram_buf(get_tim2()->cnt);
+        lcd.write_int_to_ram_buf(clocks.read_timer());
         lcd.commit();
         // cpu_busy_loop_1_second();
         cpu_busy_loop_1_ms();
+#ifdef __x86_64
+        return;
+#endif
     }
 }
 
@@ -243,7 +246,6 @@ void demo_dma()
 
 int main()
 {
-    redirect_pointers_in_x86();
     Lcd lcd;
     GPIO gpio;
     Clocks clocks;
