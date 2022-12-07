@@ -13,7 +13,15 @@ Partially supported:
 - Clocks and power
 
 ## Building and running
-See commands in `Makefile`.
+### Target (ARM)
+```
+make && make install
+```
+### x86
+```
+make x86 && ./main_x86
+```
+See other commands in `Makefile`.
 
 For developing, following packages needed at Fedora 36:
 ```

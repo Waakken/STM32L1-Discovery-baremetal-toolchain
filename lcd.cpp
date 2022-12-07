@@ -278,7 +278,11 @@ void Lcd::write_string_to_ram_buf(void)
     printf_x86("Displaying: %s\n", digit_str);
     for (unsigned i = 0; i < digit_str_len; i++) {
         int digit_idx = digit_str[i] - '0';
-        display_digit_in_location(digit_idx, i);
+        if (digit_idx > 9) {
+            display_alphabet_in_location(digit_str[i], i);
+        } else {
+            display_digit_in_location(digit_idx, i);
+        }
     }
 }
 
@@ -290,7 +294,6 @@ void Lcd::clear_digit_str()
 
 void Lcd::hex_to_str(int num)
 {
-    // TODO: letters a-f not implemented yet
     clear_digit_str();
 
     printf_x86("%s: num: %u (0x%x)\n", __func__, num, num);
@@ -310,6 +313,14 @@ void Lcd::hex_to_str(int num)
                    __func__, i, byte, byte, byte, num, num, mask);
         digit_str[i] = byte;
         num >>= 4;
+    }
+    printf_x86("%s: digit_str: %s\n", __func__, digit_str);
+}
+
+void Lcd::str_to_str(const char *str)
+{
+    for (int i = 0; i < 6; i++) {
+        digit_str[i] = str[i];
     }
 }
 

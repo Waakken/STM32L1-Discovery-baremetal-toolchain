@@ -16,6 +16,7 @@ public:
 
     void int_to_str(int num);
     void hex_to_str(int num);
+    void str_to_str(const char* str);
     void reset_ram_buf(void);
     // TODO: Does this need to be public? It seems to complicate the interface
     void write_string_to_ram_buf(void);

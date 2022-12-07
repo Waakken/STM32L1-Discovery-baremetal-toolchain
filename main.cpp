@@ -83,7 +83,6 @@ void blink_led(int count)
 
 int count_digits(int num)
 {
-    // TODO: Use definition instead of magic number
     int pow_10 = 10;
     int i = 1;
     for (; i < 7; i++) {
@@ -147,6 +146,27 @@ void test_sram()
         lcd.commit();
         // cpu_busy_loop_1_second();
     }
+}
+
+void demo_hex_alphabets()
+{
+    Lcd lcd;
+    const char *hex_alphabets[6] = {"aaaaaa", "bbbbbb", "cccccc",
+                                    "dddddd", "eeeeee", "ffffff"};
+    const char *cur_str;
+    for (unsigned hex_alphabets_idx = 0; hex_alphabets_idx < 6;
+         hex_alphabets_idx++) {
+        cur_str = hex_alphabets[hex_alphabets_idx];
+        printf_x86("%s: cur_str: %s\n", __func__, cur_str);
+        for (int digit_location = 0; digit_location < 6; digit_location++) {
+            lcd.display_alphabet_in_location(cur_str[digit_location],
+                                             digit_location);
+        }
+        lcd.commit();
+        cpu_busy_loop_1_second();
+        lcd.reset_ram_buf();
+    }
+    arm_inf_loop();
 }
 
 void demo_alphabets()
@@ -215,7 +235,7 @@ void demo_dma()
     // BSS
     printf_x86("DMA test - BSS\n");
     REG *bss_src = (REG *)(bss_buffer);
-    REG *bss_dst = (REG *)(bss_buffer + 0x200);
+    REG *bss_dst = (REG *)(bss_buffer + 0xa00);
     *bss_src = 0x12345678;
     *bss_dst = 0;
 
@@ -249,6 +269,7 @@ int main()
     // demo_alphabets();
     // demo_timer();
     demo_dma();
+    // demo_hex_alphabets();
 
     // Use following lines for manually scanning pixels through
     // lcd.set_ram_buf(4, FULL_32);
