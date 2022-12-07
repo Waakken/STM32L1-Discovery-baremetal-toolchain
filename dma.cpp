@@ -8,8 +8,7 @@ void Dma::reset_channel(unsigned int ch_index)
     dma_reg->ch[ch_index].ccr = 0;
 }
 
-void Dma::transfer_data(unsigned int ch_index, REG src, REG dst,
-                        unsigned int bytes)
+void Dma::transfer_data(unsigned int ch_index, REG src, REG dst, unsigned int bytes)
 {
 #ifdef __x86_64
     *(REG *)dst = *(REG *)src;

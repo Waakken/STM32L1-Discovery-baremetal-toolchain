@@ -86,8 +86,7 @@ int count_digits(int num)
     int pow_10 = 10;
     int i = 1;
     for (; i < 7; i++) {
-        printf_x86("%s num: %u loop: %u pow 10: %u\n", __func__, num, i,
-                   pow_10);
+        printf_x86("%s num: %u loop: %u pow 10: %u\n", __func__, num, i, pow_10);
         int div = num / pow_10;
         if (!div)
             break;
@@ -151,16 +150,13 @@ void test_sram()
 void demo_hex_alphabets()
 {
     Lcd lcd;
-    const char *hex_alphabets[6] = {"aaaaaa", "bbbbbb", "cccccc",
-                                    "dddddd", "eeeeee", "ffffff"};
+    const char *hex_alphabets[6] = {"aaaaaa", "bbbbbb", "cccccc", "dddddd", "eeeeee", "ffffff"};
     const char *cur_str;
-    for (unsigned hex_alphabets_idx = 0; hex_alphabets_idx < 6;
-         hex_alphabets_idx++) {
+    for (unsigned hex_alphabets_idx = 0; hex_alphabets_idx < 6; hex_alphabets_idx++) {
         cur_str = hex_alphabets[hex_alphabets_idx];
         printf_x86("%s: cur_str: %s\n", __func__, cur_str);
         for (int digit_location = 0; digit_location < 6; digit_location++) {
-            lcd.display_alphabet_in_location(cur_str[digit_location],
-                                             digit_location);
+            lcd.display_alphabet_in_location(cur_str[digit_location], digit_location);
         }
         lcd.commit();
         cpu_busy_loop_1_second();
@@ -192,8 +188,8 @@ void demo_timer()
 
     unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
-    printf_x86("Single tick: %u, prescaler_1ms_per_tick: %u\n",
-               single_tick_dur_ns_u, prescaler_1ms_per_tick);
+    printf_x86("Single tick: %u, prescaler_1ms_per_tick: %u\n", single_tick_dur_ns_u,
+               prescaler_1ms_per_tick);
 
     display_int_on_lcd_for_one_second(single_tick_dur_ns_u);
     display_int_on_lcd_for_one_second(prescaler_1ms_per_tick);

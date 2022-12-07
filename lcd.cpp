@@ -93,8 +93,8 @@ void Lcd::display_digit_in_location(int digit, int location)
         return;
 
     const char *str_for_digit = digit_pixel_mappings[digit];
-    printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__,
-               digit, location, str_for_digit);
+    printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__, digit, location,
+               str_for_digit);
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
@@ -106,15 +106,14 @@ void Lcd::display_digit_in_location(int digit, int location)
 void Lcd::display_alphabet_in_location(int alphabet, int location)
 {
     if (alphabet > 'z' || alphabet < 'a') {
-        printf_x86("%s error: bad args, alphabet: %u, location: %d", __func__,
-                   alphabet, location);
+        printf_x86("%s error: bad args, alphabet: %u, location: %d", __func__, alphabet, location);
         return;
     }
     alphabet -= 'a';
 
     const char *str_for_digit = alphabet_pixel_mappings[alphabet];
-    printf_x86("%s alphabet: %u, location: %u, str_for_digit: %s\n", __func__,
-               alphabet, location, str_for_digit);
+    printf_x86("%s alphabet: %u, location: %u, str_for_digit: %s\n", __func__, alphabet, location,
+               str_for_digit);
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
@@ -309,8 +308,8 @@ void Lcd::hex_to_str(int num)
         else
             byte = byte - 10 + 'a';
 
-        printf_x86("%s, i: %u, byte: %3u (0x%x, %c), num: %8u (0x%08x)\n",
-                   __func__, i, byte, byte, byte, num, num, mask);
+        printf_x86("%s, i: %u, byte: %3u (0x%x, %c), num: %8u (0x%08x)\n", __func__, i, byte, byte,
+                   byte, num, num, mask);
         digit_str[i] = byte;
         num >>= 4;
     }

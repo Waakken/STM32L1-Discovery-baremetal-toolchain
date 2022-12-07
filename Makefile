@@ -58,7 +58,7 @@ debug:
 	gdb main.hex
 
 format:
-	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux }" -i $(SRC)
+	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux, ColumnLimit: 100 }" -i $(SRC)
 
 objdump: main.elf
 	arm-none-eabi-objdump -d main.elf | less
