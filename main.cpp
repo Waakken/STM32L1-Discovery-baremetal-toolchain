@@ -96,24 +96,33 @@ int count_digits(int num)
     return i;
 }
 
-// void display_int_on_lcd_for_one_second(unsigned long number)
-void display_int_on_lcd_for_one_second(int number)
+void display_int_on_lcd(int number)
 {
     Lcd lcd;
     lcd.int_to_str(number);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
     lcd.commit();
-    cpu_busy_loop_1_second();
 }
 
-void display_hex_on_lcd_for_two_seconds(int number)
+void display_hex_on_lcd(int number)
 {
     Lcd lcd;
     lcd.hex_to_str(number);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
     lcd.commit();
+}
+
+void display_int_on_lcd_for_one_second(int number)
+{
+    display_int_on_lcd(number);
+    cpu_busy_loop_1_second();
+}
+
+void display_hex_on_lcd_for_two_seconds(int number)
+{
+    display_hex_on_lcd(number);
     cpu_busy_loop_1_second();
     cpu_busy_loop_1_second();
 }
@@ -244,6 +253,16 @@ void demo_dma()
     display_hex_on_lcd_for_two_seconds((REG)(*bss_dst));
 }
 
+// NOTE: Compiler will optimize this away without -O0. Also
+// with -Wall, gcc will not compile it.
+#if 0
+void demo_recursion(int count)
+{
+    display_hex_on_lcd(reinterpret_cast<REG>(&count));
+    demo_recursion(++count);
+}
+#endif
+
 int main()
 {
     Lcd lcd;
@@ -265,8 +284,9 @@ int main()
     printf_x86("Program starts\n");
     // test_sram();
     // demo_alphabets();
-    // demo_timer();
-    demo_dma();
+    demo_timer();
+    // demo_dma();
+    // demo_recursion(0);
     // demo_hex_alphabets();
 
     // Use following lines for manually scanning pixels through

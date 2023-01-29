@@ -1,6 +1,5 @@
 #pragma once
 
-#include "reg_addr.hpp"
 #include "reg_defs.hpp"
 
 REG *get_sram(void);

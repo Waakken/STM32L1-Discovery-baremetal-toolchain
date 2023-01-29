@@ -2,8 +2,9 @@ target remote localhost:3333
 monitor reset halt
 load
 symbol-file main.elf
-#break main
-break demo_dma
+break main
+#break demo_dma
+#break demo_recursion
 #break Dma::transfer_data
 #break Lcd::write_int_to_ram_buf(int)
 #break Lcd::write_string_to_ram_buf
@@ -21,6 +22,7 @@ display/x $r5
 display/x $r6
 display/x $r7
 display/x $r8
+display/x $pc
 
 #display 0x20000300
 #display/20 0x20000300
