@@ -1,9 +1,7 @@
 ## USER DEFINED VARIABLES ##
 PROJ_NAME = main
 SRC = $(wildcard *.cpp)
-
-
-
+HEADERS = $(wildcard *.hpp)
 
 ## COMPILER VARIABLES ##
 CC_PREFIX	= arm-none-eabi-
@@ -21,7 +19,6 @@ ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions -Wall
 ## OPENOCD VARIABLES  ##
 OOCD_BOARD = stm32ldiscovery.cfg
 
-
 ## TARGETS ##
 # List of all binaries to build
 all: program
@@ -34,8 +31,8 @@ program: $(PROJ_NAME).hex
 
 # Create the ELF version by mixing together the startup file,
 # application, and linker file
-%.elf: $(STARTUP) $(SRC)
-	$(CXX) -o $@ $(ARM_CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $^
+%.elf: $(STARTUP) $(SRC) $(HEADERS)
+	$(CXX) -o $@ $(ARM_CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $(STARTUP) $(SRC)
 
 x86: $(SRC)
 	g++ -o main_$@ $(CFLAGS) $^
@@ -58,7 +55,7 @@ debug:
 	gdb main.hex
 
 format:
-	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux, ColumnLimit: 100 }" -i $(SRC)
+	clang-format --style="{ BasedOnStyle: LLVM, IndentWidth: 4, BreakBeforeBraces: Linux, ColumnLimit: 100, AccessModifierOffset: -4, BreakConstructorInitializers: BeforeComma}" -i $(SRC) $(HEADERS)
 
 objdump: main.elf
 	arm-none-eabi-objdump -d main.elf | less

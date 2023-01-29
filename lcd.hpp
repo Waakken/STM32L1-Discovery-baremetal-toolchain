@@ -1,7 +1,7 @@
 #pragma once
 
-#include "reg_defs.hpp"
 #include "reg_accessor.hpp"
+#include "reg_defs.hpp"
 
 struct lcd_pixel {
     int com;
@@ -10,13 +10,15 @@ struct lcd_pixel {
 
 #define SET_NTH_BIT(reg, nth) ((reg) |= (1 << (nth)))
 
-class Lcd : private RegAccessor {
+class Lcd : private RegAccessor
+{
 public:
-    Lcd() : lcd_reg(get_lcd()){};
+    Lcd()
+        : lcd_reg(get_lcd()){};
 
     void int_to_str(int num);
     void hex_to_str(int num);
-    void str_to_str(const char* str);
+    void str_to_str(const char *str);
     void reset_ram_buf(void);
     // TODO: Does this need to be public? It seems to complicate the interface
     void write_string_to_ram_buf(void);

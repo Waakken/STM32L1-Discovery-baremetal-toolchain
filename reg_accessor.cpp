@@ -18,6 +18,11 @@ void RegAccessor::redirect_pointers_in_x86()
     pwr = (struct pwr *)malloc(sizeof(struct pwr));
     dma1 = (struct dma_controller *)malloc(sizeof(struct dma_controller));
     dma2 = (struct dma_controller *)malloc(sizeof(struct dma_controller));
+    uart1 = (struct uart *)malloc(sizeof(struct uart));
+    uart2 = (struct uart *)malloc(sizeof(struct uart));
+    uart3 = (struct uart *)malloc(sizeof(struct uart));
+    uart4 = (struct uart *)malloc(sizeof(struct uart));
+    uart5 = (struct uart *)malloc(sizeof(struct uart));
 
     sram = (REG *)malloc(SRAM_SIZE);
     flash = (REG *)malloc(FLASH_SIZE);
@@ -38,6 +43,11 @@ void RegAccessor::free_pointers_in_x86()
     free(pwr);
     free(dma1);
     free(dma2);
+    free(uart1);
+    free(uart2);
+    free(uart3);
+    free(uart4);
+    free(uart5);
 
     free((void *)sram);
     free((void *)flash);

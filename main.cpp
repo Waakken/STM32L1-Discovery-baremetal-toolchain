@@ -4,6 +4,7 @@
 #include "lcd.hpp"
 #include "reg_access.hpp"
 #include "reg_defs.hpp"
+#include "uart.hpp"
 #include "x86.hpp"
 
 #ifdef __x86_64

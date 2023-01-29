@@ -109,3 +109,13 @@ struct dma_controller {
     struct dma_general gen;
     struct dma_ch ch[DMA_CHANNEL_COUNT];
 };
+
+struct uart {
+    REG sr;
+    REG dr;
+    REG brr;
+    REG cr1;
+    REG cr2;
+    REG cr3;
+    REG gtpr;
+};
