@@ -1,6 +1,12 @@
 #include "clocks.hpp"
 #include "x86.hpp"
 
+void Clocks::init_clocks_for_uart()
+{
+    // USART1 clock enable
+    rcc_reg->apb2enr |= (1 << 14);
+}
+
 void Clocks::init_clocks_for_lcd()
 {
     // Power interface clock enable

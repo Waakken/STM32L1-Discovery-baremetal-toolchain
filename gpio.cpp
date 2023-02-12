@@ -4,12 +4,26 @@
 #define SET_GPIO_AFRL_BIT(reg, nth, val) (reg |= (val << (nth * 4)))
 #define SET_GPIO_AFRH_BIT(reg, nth, val) (reg |= (val << ((nth - 8) * 4)))
 
-void GPIO::set_gpio_af_modes()
+void GPIO::set_gpio_af_modes_for_uart()
+{
+    char af_7 = 7;
+    SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 6, af_7);
+    SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 7, af_7);
+}
+
+void GPIO::set_gpio_moder_to_af_for_uart()
+{
+    REG reg;
+    reg = 0b00000000'00000000'10100000'00000000;
+    gpiob_reg->moder |= reg;
+}
+
+void GPIO::set_gpio_af_modes_for_lcd()
 {
     // Set to AF 11
-
     char af_11 = 11;
 
+    // Remove for usart2, let's call it 4 digit mode: 4 LSB digits usable
     SET_GPIO_AFRL_BIT(gpioa_reg->afrl, 1, af_11);
     SET_GPIO_AFRL_BIT(gpioa_reg->afrl, 2, af_11);
     SET_GPIO_AFRL_BIT(gpioa_reg->afrl, 3, af_11);
@@ -26,6 +40,7 @@ void GPIO::set_gpio_af_modes()
     SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 3, af_11);
     SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 4, af_11);
     SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 5, af_11);
+
     for (char i = 8; i < 16; i++)
         SET_GPIO_AFRH_BIT(gpiob_reg->afrh, i, af_11);
 
@@ -35,6 +50,7 @@ void GPIO::set_gpio_af_modes()
         SET_GPIO_AFRH_BIT(gpioc_reg->afrh, i, af_11);
 
     SET_GPIO_AFRL_BIT(gpiod_reg->afrl, 2, af_11);
+
     for (char i = 8; i < 13; i++)
         SET_GPIO_AFRH_BIT(gpiod_reg->afrh, i, af_11);
 
@@ -42,7 +58,7 @@ void GPIO::set_gpio_af_modes()
         SET_GPIO_AFRL_BIT(gpioe_reg->afrl, i, af_11);
 }
 
-void GPIO::set_gpio_moder_to_af()
+void GPIO::set_gpio_moder_to_af_for_lcd()
 {
     REG reg;
     reg = 0b10000000'00101010'10100000'10101000;

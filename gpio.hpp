@@ -9,8 +9,10 @@ public:
         , gpioc_reg(get_gpioc())
         , gpiod_reg(get_gpiod())
         , gpioe_reg(get_gpioe()){};
-    void set_gpio_af_modes();
-    void set_gpio_moder_to_af();
+    void set_gpio_af_modes_for_lcd();
+    void set_gpio_moder_to_af_for_lcd();
+    void set_gpio_af_modes_for_uart();
+    void set_gpio_moder_to_af_for_uart();
     void turn_off_led();
     void turn_on_led();
 

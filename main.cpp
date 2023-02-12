@@ -264,6 +264,36 @@ void demo_recursion(int count)
 }
 #endif
 
+void demo_lcd_pixels()
+{
+    /*
+0-1 -> 0
+2-3 -> 1
+4-5 -> 2
+6-7 -> 3
+    */
+
+    Lcd lcd;
+    lcd.set_ram_buf(4, FULL_32);
+    int bit_shift = 4;
+    while (1) {
+        lcd.reset_ram_buf();
+        lcd.write_int_to_ram_buf(bit_shift);
+        lcd.commit();
+        cpu_busy_loop_1_second();
+        cpu_busy_loop_1_second();
+
+        lcd.reset_ram_buf();
+        lcd.set_ram_buf(4, 0xf << bit_shift);
+        lcd.commit();
+        cpu_busy_loop_1_second();
+        cpu_busy_loop_1_second();
+        bit_shift += 4;
+        if (bit_shift > 28)
+            bit_shift = 0;
+    }
+}
+
 int main()
 {
     Lcd lcd;
@@ -275,58 +305,27 @@ int main()
     // Initialization
     clocks.init_gpio_clocks();
 
-    gpio.set_gpio_moder_to_af();
-    gpio.set_gpio_af_modes();
+    gpio.set_gpio_moder_to_af_for_lcd();
+    gpio.set_gpio_af_modes_for_lcd();
+    gpio.set_gpio_moder_to_af_for_uart();
+    gpio.set_gpio_af_modes_for_uart();
+
     clocks.init_clocks_for_lcd();
+    clocks.init_clocks_for_uart();
     clocks.init_dma_clocks();
     lcd.init_lcd();
     lcd.reset_ram_buf();
 
     printf_x86("Program starts\n");
+    demo_dma();
+    demo_timer();
+    // demo_lcd_pixels();
     // test_sram();
     // demo_alphabets();
-    demo_timer();
-    // demo_dma();
     // demo_recursion(0);
     // demo_hex_alphabets();
 
-    // Use following lines for manually scanning pixels through
-    // lcd.set_ram_buf(4, FULL_32);
-    // int bit_shift = 0;
-    // while(1) {
-    //     lcd.reset_ram_buf();
-    //     lcd.write_int_to_ram_buf(bit_shift);
-    //     lcd.commit();
-    //     cpu_busy_loop_1_second();
-    //     cpu_busy_loop_1_second();
-
-    //     lcd.reset_ram_buf();
-    //     lcd.set_ram_buf(4, 0xf << bit_shift);
-    //     lcd.commit();
-    //     cpu_busy_loop_1_second();
-    //     cpu_busy_loop_1_second();
-    //     bit_shift += 4;
-    //     if (bit_shift > 28)
-    //         bit_shift = 0;
-    // }
-    // lcd.set_ram_buf(4, 0xf << 24);
-
-    // lcd.set_ram_buf_bit(4, 27);
-
-    // lcd.commit();
-    // arm_inf_loop();
-
-    /*
-0-1 -> 0
-2-3 -> 1
-4-5 -> 2
-6-7 -> 3
-    */
-
-    // #ifndef __x86_64
-    //     while (1)
-    //         ;
-    // #endif
+    arm_inf_loop();
 
     return 0;
 }
