@@ -6,6 +6,7 @@
 
 void GPIO::set_gpio_af_modes_for_uart()
 {
+    // For UART1
     char af_7 = 7;
     SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 6, af_7);
     SET_GPIO_AFRL_BIT(gpiob_reg->afrl, 7, af_7);
@@ -13,6 +14,7 @@ void GPIO::set_gpio_af_modes_for_uart()
 
 void GPIO::set_gpio_moder_to_af_for_uart()
 {
+    // For UART1
     REG reg;
     reg = 0b00000000'00000000'10100000'00000000;
     gpiob_reg->moder |= reg;

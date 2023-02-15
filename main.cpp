@@ -25,7 +25,7 @@ static_assert(sizeof(REG) == 4, "REG assumed to be 4 bytes in arm");
 // With -O1:
 #define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
 // With -O0:
-//#define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 15)
+// #define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 15)
 
 #define FULL_32 (0xffffffff)
 
@@ -95,6 +95,17 @@ int count_digits(int num)
     }
     printf_x86("%s num: %u has %u digits\n", __func__, num, i);
     return i;
+}
+
+void display_char_on_lcd(char c)
+{
+    Lcd lcd;
+    char str[7] = "000000";
+    str[5] = c;
+    lcd.str_to_str(str);
+    lcd.reset_ram_buf();
+    lcd.write_string_to_ram_buf();
+    lcd.commit();
 }
 
 void display_int_on_lcd(int number)
@@ -218,6 +229,17 @@ void demo_timer()
     }
 }
 
+void demo_uart()
+{
+    UART uart;
+    uart.init();
+    while (true) {
+        REG data = uart.read_char();
+        display_char_on_lcd(data);
+        // display_hex_on_lcd(data <<= 8);
+    }
+}
+
 void demo_dma()
 {
     Dma dma;
@@ -317,8 +339,13 @@ int main()
     lcd.reset_ram_buf();
 
     printf_x86("Program starts\n");
-    demo_dma();
-    demo_timer();
+#ifdef __x86_64
+    return 0;
+#endif
+
+    demo_uart();
+    // demo_dma();
+    // demo_timer();
     // demo_lcd_pixels();
     // test_sram();
     // demo_alphabets();

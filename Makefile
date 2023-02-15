@@ -14,7 +14,7 @@ STARTUP		= startup_stm32l1xx_md.s
 CFLAGS    	= -Wunused -Werror -O2 -g
 #CFLAGS    	= -Wunused -Werror -O1 -g
 #CFLAGS    	= -Wunused -Werror -O0 -g
-ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions -Wall
+ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions -Wall -fno-inline-small-functions
 
 ## OPENOCD VARIABLES  ##
 OOCD_BOARD = stm32ldiscovery.cfg

@@ -2,7 +2,8 @@ target remote localhost:3333
 monitor reset halt
 load
 symbol-file main.elf
-break main
+#break main
+#break demo_uart
 #break demo_dma
 #break demo_recursion
 #break Dma::transfer_data
@@ -10,6 +11,7 @@ break main
 #break Lcd::write_string_to_ram_buf
 #break Lcd::display_digit_in_location
 #break Lcd::display_pixel
+break UART::read_char
 layout asm
 continue
 
@@ -70,16 +72,25 @@ display/x $pc
 #set {int}0x40000010 = 0
 
 # DMA1 interrupt status register
-display/x *0x40026000
+#display/x *0x40026000
 
 # DMA1 interrupt flag clear register
-display/x *0x40026004
+#display/x *0x40026004
 
-display/x *0x40026008
-display/x *0x4002600C
-display/x *0x40026010
-display/x *0x40026014
+# Rest of DMA1 regs
+#display/x *0x40026008
+#display/x *0x4002600C
+#display/x *0x40026010
+#display/x *0x40026014
 
 # SRAM SRC and DEST
-display/x *0x20001000
-display/x *0x20002000
+#display/x *0x20001000
+#display/x *0x20002000
+
+# USART1
+#display/x *0x40013800
+display/x *0x40013804
+display/x *0x40013808
+display/x *0x4001380C
+display/x *0x40013810
+display/x *0x40013814
