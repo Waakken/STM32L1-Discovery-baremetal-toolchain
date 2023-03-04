@@ -6,17 +6,24 @@ void UART::init(void)
     uart1_reg->brr = 0x70;
 
     // TX, RX enable, enable
-    // oversampling 16
-    // 1 Start bit, 8 Data bits, n Stop bit
-    // parity
-    uart1_reg->cr1 |= 0b00000000'00000000'00100100'00001100;
+    unsigned TX_EN = 3;
+    unsigned RX_EN = 2;
+    unsigned USART_EN = 13;
+    REG reg = (1 << USART_EN) | (1 << TX_EN) | (1 << RX_EN);
+    uart1_reg->cr1 |= reg;
 }
 
-char UART::read_char(void)
+REG UART::read_char(void)
 {
     while (!(uart1_reg->sr & (1 << 5)))
         ;
 
-    char ret = uart1_reg->dr & 0xff;
+    REG ret = uart1_reg->dr & 0xffff;
     return ret;
+}
+
+void UART::write_char(char c)
+{
+    // TODO: Check that HW is ready
+    uart1_reg->dr |= c;
 }

@@ -10,7 +10,8 @@ public:
         , uart4_reg(get_uart4())
         , uart5_reg(get_uart5()){};
     void init(void);
-    char read_char(void);
+    REG read_char(void);
+    void write_char(char c);
 
 private:
     struct uart *uart1_reg;

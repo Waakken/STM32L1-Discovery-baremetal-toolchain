@@ -97,11 +97,9 @@ int count_digits(int num)
     return i;
 }
 
-void display_char_on_lcd(char c)
+void display_str_on_lcd(const char *str)
 {
     Lcd lcd;
-    char str[7] = "000000";
-    str[5] = c;
     lcd.str_to_str(str);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
@@ -233,9 +231,17 @@ void demo_uart()
 {
     UART uart;
     uart.init();
+    char str[7] = "000000";
+    int str_idx = 0;
     while (true) {
         REG data = uart.read_char();
-        display_char_on_lcd(data);
+        data &= 0xffff;
+        uart.write_char(data);
+        str[str_idx] = data;
+        str_idx++;
+        if (str_idx > 5)
+            str_idx = 0;
+        display_str_on_lcd(str);
         // display_hex_on_lcd(data <<= 8);
     }
 }
