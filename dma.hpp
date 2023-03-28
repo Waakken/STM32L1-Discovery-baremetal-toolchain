@@ -3,7 +3,7 @@
 #include "reg_accessor.hpp"
 #include "reg_defs.hpp"
 
-class Dma : private RegAccessor
+class Dma : public RegAccessor<Dma>
 {
 public:
     Dma()

@@ -11,10 +11,10 @@ OBJCOPY		= $(CC_PREFIX)objcopy
 STARTUP		= startup_stm32l1xx_md.s
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -mfix-cortex-m3-ldrd -msoft-float -O -g
 #ARM_CFLAGS	= -mthumb -mcpu=cortex-m3 -Wunused -Werror  -O2
-CFLAGS    	= -Wunused -Werror -O2 -g
+CFLAGS    	= -Wunused -Werror -O2 -g -Wall -fno-inline-small-functions -fno-threadsafe-statics -fno-use-cxa-atexit
 #CFLAGS    	= -Wunused -Werror -O1 -g
 #CFLAGS    	= -Wunused -Werror -O0 -g
-ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions -Wall -fno-inline-small-functions
+ARM_CFLAGS    	= -mthumb -mcpu=cortex-m3 $(CFLAGS) -fno-exceptions
 
 ## OPENOCD VARIABLES  ##
 OOCD_BOARD = stm32ldiscovery.cfg
@@ -32,7 +32,7 @@ program: $(PROJ_NAME).hex
 # Create the ELF version by mixing together the startup file,
 # application, and linker file
 %.elf: $(STARTUP) $(SRC) $(HEADERS)
-	$(CXX) -o $@ $(ARM_CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld $(STARTUP) $(SRC)
+	$(CXX) -o $@ $(ARM_CFLAGS) -nostartfiles -nostdlib -Wl,-Tstm32.ld -Wl,--wrap=atexit $(STARTUP) $(SRC)
 
 x86: $(SRC)
 	g++ -o main_$@ $(CFLAGS) $^

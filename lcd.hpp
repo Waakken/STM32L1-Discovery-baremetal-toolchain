@@ -10,7 +10,7 @@ struct lcd_pixel {
 
 #define SET_NTH_BIT(reg, nth) ((reg) |= (1 << (nth)))
 
-class Lcd : private RegAccessor
+class Lcd : public RegAccessor<Lcd>
 {
 public:
     Lcd()

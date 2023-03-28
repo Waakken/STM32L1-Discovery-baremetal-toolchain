@@ -1,5 +1,7 @@
 #pragma once
 
+#include "singleton.hpp"
+
 #ifdef __x86_64
 #include <stdarg.h>
 #include <stdio.h>
@@ -31,7 +33,7 @@
 #define FLASH 0x08000000
 #define FLASH_SIZE 0x3FFFF
 
-class RegAccessor
+template <typename T> class RegAccessor : public Singleton<T>
 {
 public:
     RegAccessor()
@@ -56,6 +58,17 @@ public:
         , flash((REG *)FLASH)
     {
 #ifdef __x86_64
+        static int initialization_count;
+        initialization_count++;
+        if (initialization_count > 1) {
+            // One class to control single HW resource, don't allow multiple initializations
+            printf_x86("Singleton initialized over one time, going stuck: %s\n",
+                       __PRETTY_FUNCTION__);
+            while (1)
+                ;
+        } else {
+            printf_x86("Initializing: %s\n", __PRETTY_FUNCTION__);
+        }
         redirect_pointers_in_x86();
 #endif
     };
@@ -95,8 +108,59 @@ protected:
     REG get_flash_size(void) { return FLASH_SIZE; }
 
 private:
-    void redirect_pointers_in_x86();
-    void free_pointers_in_x86();
+#ifdef __x86_64
+    void redirect_pointers_in_x86()
+    {
+        // printf("Redirecting pointers\n");
+        // TODO: Allocate contiguous area, with size of 0x40023800 -
+        // 0x40000000
+        gpioa = (struct gpio *)malloc(sizeof(struct gpio));
+        gpiob = (struct gpio *)malloc(sizeof(struct gpio));
+        gpioc = (struct gpio *)malloc(sizeof(struct gpio));
+        gpiod = (struct gpio *)malloc(sizeof(struct gpio));
+        gpioe = (struct gpio *)malloc(sizeof(struct gpio));
+        rcc = (struct rcc *)malloc(sizeof(struct rcc));
+        tim2 = (struct tim2 *)malloc(sizeof(struct tim2));
+        rtc = (struct rtc *)malloc(sizeof(struct rtc));
+        lcd = (struct lcd *)malloc(sizeof(struct lcd));
+        pwr = (struct pwr *)malloc(sizeof(struct pwr));
+        dma1 = (struct dma_controller *)malloc(sizeof(struct dma_controller));
+        dma2 = (struct dma_controller *)malloc(sizeof(struct dma_controller));
+        uart1 = (struct uart *)malloc(sizeof(struct uart));
+        uart2 = (struct uart *)malloc(sizeof(struct uart));
+        uart3 = (struct uart *)malloc(sizeof(struct uart));
+        uart4 = (struct uart *)malloc(sizeof(struct uart));
+        uart5 = (struct uart *)malloc(sizeof(struct uart));
+
+        sram = (REG *)malloc(SRAM_SIZE);
+        flash = (REG *)malloc(FLASH_SIZE);
+    }
+
+    void free_pointers_in_x86()
+    {
+        // printf("Freeing pointers\n");
+        free(gpioa);
+        free(gpiob);
+        free(gpioc);
+        free(gpiod);
+        free(gpioe);
+        free(rcc);
+        free(tim2);
+        free(rtc);
+        free(lcd);
+        free(pwr);
+        free(dma1);
+        free(dma2);
+        free(uart1);
+        free(uart2);
+        free(uart3);
+        free(uart4);
+        free(uart5);
+
+        free((void *)sram);
+        free((void *)flash);
+    }
+#endif
 
     struct gpio *gpioa;
     struct gpio *gpiob;

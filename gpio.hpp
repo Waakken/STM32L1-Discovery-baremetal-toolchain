@@ -1,6 +1,6 @@
 #include "reg_accessor.hpp"
 
-class GPIO : private RegAccessor
+class GPIO : public RegAccessor<GPIO>
 {
 public:
     GPIO()

@@ -1,6 +1,6 @@
 #include "reg_accessor.hpp"
 
-class UART : private RegAccessor
+class UART : private RegAccessor<UART>
 {
 public:
     UART()

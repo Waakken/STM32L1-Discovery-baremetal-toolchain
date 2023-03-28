@@ -1,6 +1,6 @@
 #include "reg_accessor.hpp"
 
-class Clocks : private RegAccessor
+class Clocks : public RegAccessor<Clocks>
 {
 public:
     Clocks()

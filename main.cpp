@@ -4,6 +4,7 @@
 #include "lcd.hpp"
 #include "reg_access.hpp"
 #include "reg_defs.hpp"
+#include "singleton.hpp"
 #include "uart.hpp"
 #include "x86.hpp"
 
@@ -69,8 +70,8 @@ void cpu_busy_loop_10_loops()
 
 void blink_led(int count)
 {
-    GPIO gpio;
-    Clocks clocks;
+    GPIO &gpio = GPIO::get();
+    Clocks &clocks = Clocks::get();
 
     for (int i = 0; i < count; i++) {
         gpio.turn_on_led();
@@ -99,7 +100,7 @@ int count_digits(int num)
 
 void display_str_on_lcd(const char *str)
 {
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     lcd.str_to_str(str);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
@@ -108,7 +109,7 @@ void display_str_on_lcd(const char *str)
 
 void display_int_on_lcd(int number)
 {
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     lcd.int_to_str(number);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
@@ -117,7 +118,7 @@ void display_int_on_lcd(int number)
 
 void display_hex_on_lcd(int number)
 {
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     lcd.hex_to_str(number);
     lcd.reset_ram_buf();
     lcd.write_string_to_ram_buf();
@@ -147,7 +148,7 @@ void arm_inf_loop()
 
 void test_sram()
 {
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     REG *sram_ptr = get_sram();
     REG sram_size = get_sram_size();
 
@@ -168,7 +169,7 @@ void test_sram()
 
 void demo_hex_alphabets()
 {
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     const char *hex_alphabets[6] = {"aaaaaa", "bbbbbb", "cccccc", "dddddd", "eeeeee", "ffffff"};
     const char *cur_str;
     for (unsigned hex_alphabets_idx = 0; hex_alphabets_idx < 6; hex_alphabets_idx++) {
@@ -190,7 +191,7 @@ void demo_alphabets()
     // lcd.commit();
     // arm_inf_loop();
 
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     for (int i = 'a'; i < 'z'; i++) {
         lcd.display_alphabet_in_location(i, 1);
         lcd.commit();
@@ -202,8 +203,8 @@ void demo_alphabets()
 
 void demo_timer()
 {
-    Lcd lcd;
-    Clocks clocks;
+    Lcd &lcd = Lcd::get();
+    Clocks &clocks = Clocks::get();
 
     unsigned single_tick_dur_ns_u = 1000000000 / 2097000;
     unsigned prescaler_1ms_per_tick = 1000000 / single_tick_dur_ns_u;
@@ -248,7 +249,7 @@ void demo_uart()
 
 void demo_dma()
 {
-    Dma dma;
+    Dma &dma = Dma::get();
 
     // TODO: Heap not reserved yet
     // Heap
@@ -301,7 +302,7 @@ void demo_lcd_pixels()
 6-7 -> 3
     */
 
-    Lcd lcd;
+    Lcd &lcd = Lcd::get();
     lcd.set_ram_buf(4, FULL_32);
     int bit_shift = 4;
     while (1) {
@@ -324,10 +325,9 @@ void demo_lcd_pixels()
 
 int main()
 {
-    Lcd lcd;
-    GPIO gpio;
-    Clocks clocks;
-    Dma dma;
+    Lcd &lcd = Lcd::get();
+    GPIO &gpio = GPIO::get();
+    Clocks &clocks = Clocks::get();
 
     printf_x86("Initializing\n");
     // Initialization
