@@ -30,6 +30,7 @@ public:
     void display_alphabet_in_location(int alphabet, int location);
     void set_ram_buf(int ram_buf_idx, REG val);
     void set_ram_buf_bit(int ram_buf_idx, int bit_idx);
+    static int my_strlen(const volatile char *str);
 
 private:
     void clear_digit_str();
@@ -37,7 +38,6 @@ private:
     void fill_ram_buf();
     void write_next_pixel();
     void write_full_buf();
-    int my_strlen(const volatile char *str) const;
     struct lcd_pixel map_pixel_alphabet(int digit, int alphabet) const;
     void display_digit_in_location(int digit, int location);
 

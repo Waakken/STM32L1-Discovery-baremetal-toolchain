@@ -2,7 +2,7 @@ target remote localhost:3333
 monitor reset halt
 load
 symbol-file main.elf
-#break main
+break main
 #break demo_uart
 #break demo_dma
 #break demo_recursion
@@ -11,7 +11,7 @@ symbol-file main.elf
 #break Lcd::write_string_to_ram_buf
 #break Lcd::display_digit_in_location
 #break Lcd::display_pixel
-break UART::read_char
+#break UART::read_char
 layout asm
 continue
 

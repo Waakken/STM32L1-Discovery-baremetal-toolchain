@@ -22,6 +22,7 @@ static_assert(sizeof(REG) == 8, "REG assumed to be 8 bytes in x86");
 static_assert(sizeof(REG) == 4, "REG assumed to be 4 bytes in arm");
 #endif
 
+// 2.097 MHz
 #define MSI_CLOCK_DEFAULT_FREQ 2097000
 // With -O1:
 #define LOOPS_FOR_1_SEC_BUSY_LOOP (MSI_CLOCK_DEFAULT_FREQ / 6)
@@ -230,20 +231,22 @@ void demo_timer()
 
 void demo_uart()
 {
-    UART uart;
-    uart.init();
+    UART &uart = UART::get();
     char str[7] = "000000";
     int str_idx = 0;
+    uart.send_str("In UART demo, echoing back received characters\n\r");
     while (true) {
         REG data = uart.read_char();
         data &= 0xffff;
-        uart.write_char(data);
+        // TODO: This only works if user sends space:
+        // uart.send_str("Received: ");
+        uart.send_char(data);
+        // Also display on LCD
         str[str_idx] = data;
         str_idx++;
         if (str_idx > 5)
             str_idx = 0;
         display_str_on_lcd(str);
-        // display_hex_on_lcd(data <<= 8);
     }
 }
 
@@ -329,7 +332,7 @@ int main()
     GPIO &gpio = GPIO::get();
     Clocks &clocks = Clocks::get();
 
-    printf_x86("Initializing\n");
+    printf_x86("Initializing clocks and gpio\n");
     // Initialization
     clocks.init_gpio_clocks();
 
@@ -348,6 +351,10 @@ int main()
 #ifdef __x86_64
     return 0;
 #endif
+
+    UART &uart = UART::get();
+    uart.send_str("\n\r");
+    uart.send_str("Main - clocks and gpio intitialized\n\r");
 
     demo_uart();
     // demo_dma();
