@@ -31,7 +31,7 @@ static_assert(sizeof(REG) == 4, "REG assumed to be 4 bytes in arm");
 
 #define FULL_32 (0xffffffff)
 
-char bss_buffer[0x1000];
+char dma_demo_bss_buffer[0x1000];
 
 // forward declarations
 void blink_led(int count);
@@ -250,10 +250,22 @@ void demo_uart()
     }
 }
 
+void dump_address_over_uart(const char *msg, REG addr)
+{
+    UART &uart = UART::get();
+    uart.send_str(msg);
+    uart.send_str(" - addr: ");
+    uart.send_hex((addr));
+    uart.send_str(" value: ");
+    uart.send_hex(*(REG *)addr);
+    uart.send_newline();
+}
+
 void demo_dma()
 {
     Dma &dma = Dma::get();
-
+    UART &uart = UART::get();
+    uart.send_str("DMA demo\n\r");
     // TODO: Heap not reserved yet
     // Heap
     // REG *src = (REG *)0x20001000;
@@ -262,26 +274,39 @@ void demo_dma()
     // *dst = 0;
 
     // Stack
-    printf_x86("DMA test - stack\n");
+    uart.send_str("DMA test - stack - before\n\r");
     REG src;
     REG dst;
     src = 0x12345678;
     dst = 0;
 
+    dump_address_over_uart("Source", (REG)&src);
+    dump_address_over_uart("Dest  ", (REG)&dst);
+
     dma.reset_channel(0);
     dma.transfer_data(0, (REG)&src, (REG)&dst, 4);
+
+    uart.send_str("DMA test - stack - after\n\r");
+    dump_address_over_uart("Source", (REG)&src);
+    dump_address_over_uart("Dest  ", (REG)&dst);
     display_hex_on_lcd_for_two_seconds((REG)(&dst));
     display_hex_on_lcd_for_two_seconds((REG)(dst));
 
     // BSS
-    printf_x86("DMA test - BSS\n");
-    REG *bss_src = (REG *)(bss_buffer);
-    REG *bss_dst = (REG *)(bss_buffer + 0xa00);
+    uart.send_str("DMA test - BSS - before\n\r");
+    REG *bss_src = (REG *)(dma_demo_bss_buffer);
+    REG *bss_dst = (REG *)(dma_demo_bss_buffer + 0xa00);
     *bss_src = 0x12345678;
     *bss_dst = 0;
+    dump_address_over_uart("BSS Source", (REG)bss_src);
+    dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
 
     dma.reset_channel(0);
     dma.transfer_data(0, (REG)bss_src, (REG)bss_dst, 4);
+
+    uart.send_str("DMA test - BSS - after\n\r");
+    dump_address_over_uart("BSS Source", (REG)bss_src);
+    dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
     display_hex_on_lcd_for_two_seconds((REG)(bss_dst));
     display_hex_on_lcd_for_two_seconds((REG)(*bss_dst));
 }
@@ -347,17 +372,17 @@ int main()
     lcd.init_lcd();
     lcd.reset_ram_buf();
 
+    Dma::get();
+    UART::get();
+
     printf_x86("Program starts\n");
-#ifdef __x86_64
-    return 0;
-#endif
 
     UART &uart = UART::get();
-    uart.send_str("\n\r");
+    uart.send_newline();
     uart.send_str("Main - clocks and gpio intitialized\n\r");
 
-    demo_uart();
-    // demo_dma();
+    demo_dma();
+    // demo_uart();
     // demo_timer();
     // demo_lcd_pixels();
     // test_sram();

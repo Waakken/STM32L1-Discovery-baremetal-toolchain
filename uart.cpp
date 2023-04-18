@@ -55,8 +55,28 @@ void UART::send_char(unsigned c)
 
 void UART::send_str(const char *str)
 {
+#ifdef __x86_64
+    printf_x86("%s", str);
+#else
     for (int i = 0; i < Lcd::my_strlen(str); i++) {
         send_char(str[i]);
+    }
+#endif
+}
+
+void UART::send_newline(void) { send_str("\n\r"); }
+
+void UART::send_hex(REG hex)
+{
+    printf_x86("0x%8x", hex);
+    for (int i = 7; i >= 0; i--) {
+        unsigned c = (hex >> (i * 4)) & 0xf;
+        c = Lcd::byte_to_hex_ascii(c);
+#ifdef __x86_64
+        // printf_x86("Char to be sent: 0x%x c: %c\n", c);
+#else
+        send_char(c);
+#endif
     }
 }
 

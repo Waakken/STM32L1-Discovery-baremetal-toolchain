@@ -93,8 +93,10 @@ void Lcd::display_digit_in_location(int digit, int location)
         return;
 
     const char *str_for_digit = digit_pixel_mappings[digit];
+#ifdef DEBUG_LCD_X86
     printf_x86("%s digit: %u, location: %u, str_for_digit: %s\n", __func__, digit, location,
                str_for_digit);
+#endif
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
@@ -112,8 +114,10 @@ void Lcd::display_alphabet_in_location(int alphabet, int location)
     alphabet -= 'a';
 
     const char *str_for_digit = alphabet_pixel_mappings[alphabet];
+#ifdef DEBUG_LCD_X86
     printf_x86("%s alphabet: %u, location: %u, str_for_digit: %s\n", __func__, alphabet, location,
                str_for_digit);
+#endif
     struct lcd_pixel pix;
     for (int j = 0; j < my_strlen(str_for_digit); j++) {
         char segment = str_for_digit[j];
@@ -258,6 +262,15 @@ void Lcd::init_lcd() const
     lcd_reg->cr |= 1;
 }
 
+char Lcd::byte_to_hex_ascii(char byte)
+{
+    if (byte < 10)
+        byte += '0';
+    else
+        byte = byte - 10 + 'a';
+    return byte;
+}
+
 int Lcd::my_strlen(const volatile char *str)
 {
     int i = 0;
@@ -295,7 +308,9 @@ void Lcd::hex_to_str(int num)
 {
     clear_digit_str();
 
+#ifdef DEBUG_LCD_X86
     printf_x86("%s: num: %u (0x%x)\n", __func__, num, num);
+#endif
 
     // Displaying only 6 most significant digits
     num >>= 8;
@@ -303,17 +318,18 @@ void Lcd::hex_to_str(int num)
     for (int i = 5; i >= 0; i--) {
         mask = (0xF);
         char byte = num & mask;
-        if (byte < 10)
-            byte += '0';
-        else
-            byte = byte - 10 + 'a';
+        byte = byte_to_hex_ascii(byte);
 
+#ifdef DEBUG_LCD_X86
         printf_x86("%s, i: %u, byte: %3u (0x%x, %c), num: %8u (0x%08x)\n", __func__, i, byte, byte,
                    byte, num, num, mask);
+#endif
         digit_str[i] = byte;
         num >>= 4;
     }
+#ifdef DEBUG_LCD_X86
     printf_x86("%s: digit_str: %s\n", __func__, digit_str);
+#endif
 }
 
 void Lcd::str_to_str(const char *str)

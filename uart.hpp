@@ -15,6 +15,8 @@ public:
     REG read_char(void);
     void send_char(unsigned c);
     void send_str(const char *str);
+    void send_newline(void);
+    void send_hex(REG hex);
     void send_break();
 
 private:

@@ -3,6 +3,8 @@
 #include "reg_accessor.hpp"
 #include "reg_defs.hpp"
 
+// #define DEBUG_LCD_X86
+
 struct lcd_pixel {
     int com;
     int seg;
@@ -31,6 +33,7 @@ public:
     void set_ram_buf(int ram_buf_idx, REG val);
     void set_ram_buf_bit(int ram_buf_idx, int bit_idx);
     static int my_strlen(const volatile char *str);
+    static char byte_to_hex_ascii(char byte);
 
 private:
     void clear_digit_str();
