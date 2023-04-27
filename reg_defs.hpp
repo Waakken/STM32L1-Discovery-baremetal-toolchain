@@ -119,3 +119,37 @@ struct uart {
     REG cr3;
     REG gtpr;
 };
+
+#define NVIC_PADDING 0x74
+
+struct nvic {
+    REG iser0;
+    REG iser1;
+    REG iser2;
+    // TODO: Check is valid first
+    char padding0[NVIC_PADDING];
+
+    REG icer0;
+    REG icer1;
+    REG icer2;
+    // TODO: Check is valid first
+    char padding1[NVIC_PADDING];
+
+    REG ispr0;
+    REG ispr1;
+    REG ispr2;
+    // TODO: Check is valid first
+    char padding2[NVIC_PADDING];
+
+    REG icpr0;
+    REG icpr1;
+    REG icpr2;
+    // TODO: Check is valid first
+    char padding3[NVIC_PADDING];
+
+    REG iabr0;
+    REG iabr1;
+    REG iabr2;
+    // TODO: Check is valid first
+    char padding4[NVIC_PADDING];
+};

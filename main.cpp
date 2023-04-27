@@ -250,15 +250,27 @@ void demo_uart()
     }
 }
 
-void dump_address_over_uart(const char *msg, REG addr)
+void demo_interrupt_handler()
+{
+#ifdef __x86_64
+    return;
+#endif
+    UART &uart = UART::get();
+    uart.send_str("Demo interrupts\n\r");
+    int *null = nullptr;
+    int val = *null;
+    uart.dump_address_over_uart("null value: ", (REG)&val);
+}
+
+void dump_nvic_contents()
 {
     UART &uart = UART::get();
-    uart.send_str(msg);
-    uart.send_str(" - addr: ");
-    uart.send_hex((addr));
-    uart.send_str(" value: ");
-    uart.send_hex(*(REG *)addr);
-    uart.send_newline();
+    // NVIC address = 0xE000E100
+    struct nvic *nvic_reg = (struct nvic *)0xE000E100;
+    uart.dump_address_over_uart("NVIC iser0", (REG)&nvic_reg->iser0);
+    uart.dump_address_over_uart("NVIC icer0", (REG)&nvic_reg->icer0);
+    uart.dump_address_over_uart("NVIC ispr0", (REG)&nvic_reg->ispr0);
+    uart.dump_address_over_uart("NVIC icpr0", (REG)&nvic_reg->icpr0);
 }
 
 void demo_dma()
@@ -280,15 +292,18 @@ void demo_dma()
     src = 0x12345678;
     dst = 0;
 
-    dump_address_over_uart("Source", (REG)&src);
-    dump_address_over_uart("Dest  ", (REG)&dst);
+    // uart.dump_address_over_uart("DMA interrupts", (REG)&dma.dma_reg->gen.isr);
+    uart.dump_address_over_uart("Source", (REG)&src);
+    uart.dump_address_over_uart("Dest  ", (REG)&dst);
 
     dma.reset_channel(0);
     dma.transfer_data(0, (REG)&src, (REG)&dst, 4);
 
     uart.send_str("DMA test - stack - after\n\r");
-    dump_address_over_uart("Source", (REG)&src);
-    dump_address_over_uart("Dest  ", (REG)&dst);
+    // uart.dump_address_over_uart("DMA interrupts", (REG)&dma.dma_reg->gen.isr);
+    uart.dump_address_over_uart("Source", (REG)&src);
+    uart.dump_address_over_uart("Dest  ", (REG)&dst);
+
     display_hex_on_lcd_for_two_seconds((REG)(&dst));
     display_hex_on_lcd_for_two_seconds((REG)(dst));
 
@@ -298,15 +313,15 @@ void demo_dma()
     REG *bss_dst = (REG *)(dma_demo_bss_buffer + 0xa00);
     *bss_src = 0x12345678;
     *bss_dst = 0;
-    dump_address_over_uart("BSS Source", (REG)bss_src);
-    dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
+    uart.dump_address_over_uart("BSS Source", (REG)bss_src);
+    uart.dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
 
     dma.reset_channel(0);
     dma.transfer_data(0, (REG)bss_src, (REG)bss_dst, 4);
 
     uart.send_str("DMA test - BSS - after\n\r");
-    dump_address_over_uart("BSS Source", (REG)bss_src);
-    dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
+    uart.dump_address_over_uart("BSS Source", (REG)bss_src);
+    uart.dump_address_over_uart("BSS Dest  ", (REG)bss_dst);
     display_hex_on_lcd_for_two_seconds((REG)(bss_dst));
     display_hex_on_lcd_for_two_seconds((REG)(*bss_dst));
 }
@@ -316,8 +331,13 @@ void demo_dma()
 #if 0
 void demo_recursion(int count)
 {
+    UART &uart = UART::get();
+    uart.dump_address_over_uart("Recursion", (REG)&count);
     display_hex_on_lcd(reinterpret_cast<REG>(&count));
-    demo_recursion(++count);
+    if (count > 1000)
+        return;
+    else
+        demo_recursion(++count);
 }
 #endif
 
@@ -379,15 +399,17 @@ int main()
 
     UART &uart = UART::get();
     uart.send_newline();
+    uart.send_newline();
     uart.send_str("Main - clocks and gpio intitialized\n\r");
 
-    demo_dma();
+    demo_interrupt_handler();
+    // demo_recursion(0);
+    // demo_dma();
     // demo_uart();
     // demo_timer();
     // demo_lcd_pixels();
     // test_sram();
     // demo_alphabets();
-    // demo_recursion(0);
     // demo_hex_alphabets();
 
     arm_inf_loop();

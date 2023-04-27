@@ -81,3 +81,13 @@ void UART::send_hex(REG hex)
 }
 
 void UART::send_break() { uart1_reg->cr1 |= 1; }
+
+void UART::dump_address_over_uart(const char *msg, REG addr)
+{
+    send_str(msg);
+    send_str(" - addr: ");
+    send_hex((addr));
+    send_str(" value: ");
+    send_hex(*(REG *)addr);
+    send_newline();
+}

@@ -3,6 +3,7 @@ monitor reset halt
 load
 symbol-file main.elf
 break main
+break demo_interrupt_handler
 #break demo_uart
 #break demo_dma
 #break demo_recursion

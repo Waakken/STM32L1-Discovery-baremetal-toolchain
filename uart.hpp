@@ -18,6 +18,7 @@ public:
     void send_newline(void);
     void send_hex(REG hex);
     void send_break();
+    void dump_address_over_uart(const char *msg, REG addr);
 
 private:
     void init(void);

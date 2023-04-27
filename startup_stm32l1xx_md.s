@@ -108,7 +108,7 @@ bx lr
 .section .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
-b Infinite_Loop
+bl genericInterruptHandler
 .size Default_Handler, .-Default_Handler
 /******************************************************************************
 *
